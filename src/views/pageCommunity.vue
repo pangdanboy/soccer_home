@@ -1,10 +1,10 @@
 <template>
-  <div id="chat_room">聊天室</div>
+  <div id="community">社区</div>
 </template>
 
 <script>
 export default {
-  name: 'chatRoom'
+  name: 'pageCommunity'
 }
 </script>
 

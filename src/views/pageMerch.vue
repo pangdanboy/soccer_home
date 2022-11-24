@@ -1,10 +1,10 @@
 <template>
-  <div id="chat_home">主页</div>
+  <div id="merch">周边</div>
 </template>
 
 <script>
 export default {
-  name: 'chatHome'
+  name: 'pageMerch'
 }
 </script>
 

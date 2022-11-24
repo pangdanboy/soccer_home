@@ -6,12 +6,32 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/chatHome'
+    redirect: '/pageHome'
   },
   {
-    path: '/chatHome',
-    name: 'chatHome',
-    component: () => import('../views/chatHome')
+    path: '/pageHome',
+    name: 'pageHome',
+    component: () => import('../views/pageHome')
+  },
+  {
+    path: '/pageChatRoom',
+    name: 'pageChatRoom',
+    component: () => import('../views/pageChatRoom')
+  },
+  {
+    path: '/pageNews',
+    name: 'pageNews',
+    component: () => import('../views/pageNews')
+  },
+  {
+    path: '/pageCommunity',
+    name: 'pageCommunity',
+    component: () => import('../views/pageCommunity')
+  },
+  {
+    path: '/pageMerch',
+    name: 'pageMerch',
+    component: () => import('../views/pageMerch')
   }
 ]
 
