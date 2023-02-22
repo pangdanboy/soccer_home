@@ -32,6 +32,11 @@ const routes = [
     path: '/pageMerch',
     name: 'pageMerch',
     component: () => import('../views/pageMerch')
+  },
+  {
+    path: '/pageUserLogin',
+    name: 'pageUserLogin',
+    component: () => import('../views/pageUserLogin')
   }
 ]
 

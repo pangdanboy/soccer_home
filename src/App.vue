@@ -32,6 +32,7 @@
             <v-tab to="/pageNews">热点</v-tab>
             <v-tab to="/pageCommunity">社区</v-tab>
             <v-tab to="/pageMerch">周边</v-tab>
+            <v-tab to="/pageUserLogin">登录</v-tab>
           </v-tabs>
         </template>
       </v-app-bar>
