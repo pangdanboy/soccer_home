@@ -11,32 +11,32 @@ const routes = [
   {
     path: '/pageHome',
     name: 'pageHome',
-    component: () => import('../views/pageHome')
+    component: () => import('../views/pageHome/index.vue')
   },
   {
-    path: '/pageChatRoom',
-    name: 'pageChatRoom',
-    component: () => import('../views/pageChatRoom')
+    path: '/pageMessageCenter',
+    name: 'pageMessageCenter',
+    component: () => import('../views/pageMessageCenter/index.vue')
   },
   {
     path: '/pageNews',
     name: 'pageNews',
-    component: () => import('../views/pageNews')
+    component: () => import('../views/pageNews/index.vue')
   },
   {
     path: '/pageCommunity',
     name: 'pageCommunity',
-    component: () => import('../views/pageCommunity')
+    component: () => import('../views/pageCommunity/index.vue')
   },
   {
-    path: '/pageMerch',
-    name: 'pageMerch',
-    component: () => import('../views/pageMerch')
+    path: '/pageUserCenter',
+    name: 'pageUserCenter',
+    component: () => import('../views/pageUserCenter/index.vue')
   },
   {
-    path: '/pageUserLogin',
-    name: 'pageUserLogin',
-    component: () => import('../views/pageUserLogin')
+    path: '/pageLogin',
+    name: 'pageLogin',
+    component: () => import('../views/pageLogin/index.vue')
   }
 ]
 

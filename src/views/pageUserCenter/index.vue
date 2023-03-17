@@ -1,11 +1,11 @@
 <template>
-    <div id="user_login">
+    <div id="user_center">
     </div>
 </template>
 
 <script>
 export default {
-  name: 'pageUserLogin',
+  name: 'pageUserCenter',
   components: {
   },
   data: () => ({

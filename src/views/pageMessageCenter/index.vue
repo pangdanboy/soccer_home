@@ -1,10 +1,10 @@
 <template>
-  <div id="merch">周边</div>
+  <div id="chat_room">消息中心</div>
 </template>
 
 <script>
 export default {
-  name: 'pageMerch'
+  name: 'pageMessageCenter'
 }
 </script>
 

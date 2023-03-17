@@ -8,6 +8,8 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+  #community{
+    height: 1000px;
+  }
 </style>
