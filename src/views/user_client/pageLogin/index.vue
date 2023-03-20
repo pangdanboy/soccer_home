@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import login from '@/views/pageLogin/components/login.vue'
-import register from '@/views/pageLogin/components/register.vue'
+import login from '@/views/user_client/pageLogin/components/login.vue'
+import register from '@/views/user_client/pageLogin/components/register.vue'
 export default {
   name: 'pageLogin',
   components: {
@@ -38,7 +38,7 @@ export default {
   #login_register{
     width: 100vw;
     height: 100vh;
-    background-image: url('./../../../public/images/m_c.jpg');
+    background-image: url('./../../../static/images/m_c.jpg');
     background-size: cover;
     .page-main{
       width: 100%;

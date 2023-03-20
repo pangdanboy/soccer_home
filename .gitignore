@@ -1,6 +1,8 @@
 .DS_Store
 node_modules
 /dist
+/src/server/node_modules
+/src/server/package-lock.json
 package-lock.json
 
 
