@@ -37,6 +37,11 @@ const routes = [
     path: '/pageLogin',
     name: 'pageLogin',
     component: () => import('../views/user_client/pageLogin/index.vue')
+  },
+  {
+    path: '/pageAdmin',
+    name: 'pageAdmin',
+    component: () => import('../views/admin_client/index.vue')
   }
 ]
 

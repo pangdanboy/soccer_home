@@ -11,7 +11,7 @@
           <!-- 标题 -->
           <v-toolbar-title>足球小窝</v-toolbar-title>
           <v-spacer></v-spacer>
-          <!-- 路由入口，消息中心和用户中心 -->
+          <!-- 路由入口，消息中心和用户中心以及管理员入口 -->
           <router-link to="/pageMessageCenter" tag="span">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -22,7 +22,7 @@
               <span>消息中心</span>
             </v-tooltip>
           </router-link>
-          <router-link :to="USER_LOGIN_STATUS ? '/pageUserCenter' : 'pageLogin'" tag="span">
+          <router-link :to="USER_LOGIN_STATUS ? '/pageUserCenter' : '/pageLogin'" tag="span">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon v-bind="attrs" v-on="on" v-show="!USER_LOGIN_STATUS">
@@ -33,6 +33,16 @@
                 </v-avatar>
               </template>
               <span>{{ USER_LOGIN_STATUS ? '个人中心' : '登录注册'}}</span>
+            </v-tooltip>
+          </router-link>
+          <router-link to="/pageAdmin" tag="span" v-show="USER_ROLE === USER_PERMISSIONS.SUPER_ADMIN">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-account-lock-open</v-icon>
+                </v-btn>
+              </template>
+              <span>管理员</span>
             </v-tooltip>
           </router-link>
         </template>
@@ -54,20 +64,37 @@
     </v-card>
     <!-- 页面滚动到顶部按钮以及主题切换 -->
     <div class="tool-box" v-show="toggleBtnShow">
-      <v-btn height="45px" class="ma-2" color="#995fce" @click="pageUp">
-        <v-icon>mdi-arrow-up</v-icon>
-      </v-btn>
-      <v-btn height="45px" color="#995fce" @click="toggleTheme">
-        <v-icon>{{iconText}}</v-icon>
-      </v-btn>
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn height="45px" class="ma-2" @click="pageUp" v-bind="attrs" v-on="on">
+            <v-icon>mdi-arrow-up</v-icon>
+          </v-btn>
+        </template>
+        <span>回到顶部</span>
+      </v-tooltip>
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn height="45px" @click="toggleTheme" v-bind="attrs" v-on="on">
+            <v-icon>{{iconText}}</v-icon>
+          </v-btn>
+        </template>
+        <span>切换主题</span>
+      </v-tooltip>
     </div>
+    <!-- 全局提示组件 -->
+    <message></message>
   </v-app>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
+import { USER_PERMISSIONS, NOT_SHOW_NAV_PAGES } from '@/constant'
+import message from '@/components/message.vue'
 export default {
   name: 'App',
+  components: {
+    message
+  },
   mounted () {
     if (window.pageYOffset > 100) {
       this.toggleBtnShow = true
@@ -84,7 +111,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['USER_LOGIN_STATUS', 'USER_AVATAR'])
+    ...mapGetters(['USER_LOGIN_STATUS', 'USER_AVATAR', 'USER_ROLE'])
   },
   data: () => ({
     // 页面工具按钮是否显示
@@ -92,9 +119,11 @@ export default {
     // 导航栏是否显示
     navShow: true,
     // 页面工具按钮图标名称
-    iconText: 'mdi-decagram'
+    iconText: 'mdi-decagram',
+    USER_PERMISSIONS
   }),
   methods: {
+    ...mapMutations(['OPEN_MESSAGE']),
     // 主题切换
     toggleTheme () {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark
@@ -107,13 +136,18 @@ export default {
         left: 0,
         behavior: 'smooth'
       })
+      this.OPEN_MESSAGE({
+        content: '这是一个提示',
+        type: 'success',
+        timeout: 2000
+      })
     }
   },
   watch: {
     $route: {
       // 监听路由，控制导航栏的显示与隐藏
       handler (newVal, oldVal) {
-        if (newVal.name === 'pageMessageCenter' || newVal.name === 'pageUserCenter' || newVal.name === 'pageLogin') {
+        if (NOT_SHOW_NAV_PAGES.includes(newVal.name)) {
           this.navShow = false
         } else {
           this.navShow = true
