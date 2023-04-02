@@ -38,7 +38,7 @@ export default {
   #login_register{
     width: 100vw;
     height: 100vh;
-    background-image: url('./../../../static/images/m_c.jpg');
+    background-image: url('./../../../static/images/home.jpg');
     background-size: cover;
     .page-main{
       width: 100%;

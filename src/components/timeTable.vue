@@ -281,7 +281,7 @@ export default {
       default: []
     }
   },
-  mounted () {
+  beforeMount () {
     // 根据用户当前的空闲时间列表处理渲染数据
     if (this.freeTimeList.length !== 0) {
       this.timeData.forEach((weekItem) => {
@@ -292,10 +292,6 @@ export default {
         })
       })
     }
-    // 为每天添加日期
-    this.timeData.forEach((weekItem, index) => {
-      weekItem.date = this.weekDayDate[index]
-    })
   },
   methods: {
     setBusy (day) {
@@ -308,6 +304,15 @@ export default {
       this.saveBtn = false
       day.free = true
     }
+  },
+  watch: {
+    weekDayDate: function () {
+      console.log('当周日期')
+      // 为每天添加日期
+      this.timeData.forEach((weekItem, index) => {
+        weekItem.date = this.weekDayDate[index]
+      })
+    }
   }
 }
 </script>
@@ -315,7 +320,7 @@ export default {
 <style scoped lang="scss">
   #time_table{
     padding: 15px;
-    background-image: url('./../static/images/soccer.png');
+    background-image: url('./../static/images/timeTable.jpg');
     background-size: cover;
   }
 </style>

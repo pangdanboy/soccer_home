@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'login',
@@ -57,11 +58,15 @@ export default {
     valid: false
   }),
   methods: {
+    ...mapMutations(['OPEN_MESSAGE']),
     reset () {
       this.$refs.form.reset()
     },
     login () {
-      this.$refs.form.validate()
+      const verify = this.$refs.form.validate()
+      if (verify) {
+        console.log('调用接口验证用户登录信息')
+      }
     },
     jumpRegister () {
       this.$emit('jumpRegister')

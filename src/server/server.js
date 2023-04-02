@@ -4,7 +4,7 @@ const cors = require('cors')
 const app = express()
 const { corsOptions } = require('./utlis/cors')
 const { serverInfo } = require('./global/config')
-// const { defaultMongoDBConnection } = require('./utlis/db/mongoose/mongooseConnection')
+const { defaultMongoDBConnection } = require('./utlis/db/mongoose/mongooseConnection')
 
 // 解决跨域
 app.use(cors(corsOptions))
@@ -14,11 +14,13 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 // 连接数据库
-// defaultMongoDBConnection()
+defaultMongoDBConnection()
 
 app.get('/', (req, res) => {
   res.end('hello world')
 })
+
+// 响应请求路由
 
 // 开启请求监听
 app.listen(serverInfo.port, () => {

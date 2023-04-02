@@ -9,8 +9,9 @@ const MongoDB = {
 const serverInfo = {
   port: process.env.PORT || 5000
 }
-
+const secretOrKey = 'secret'
 module.exports = {
   MongoDB,
-  serverInfo
+  serverInfo,
+  secretOrKey
 }

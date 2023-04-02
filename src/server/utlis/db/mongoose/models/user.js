@@ -1,11 +1,27 @@
 const mongoose = require('mongoose')
 const user = {
-  name: {
+  username: {
     type: String,
     require: true
   },
-  age: {
-    type: Number,
+  signature: {
+    type: String,
+    require: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    required: true
+  },
+  freeTimeList: {
+    type: Array,
     required: true
   },
   createTime: {
@@ -15,7 +31,7 @@ const user = {
   }
 }
 const userSchema = new mongoose.Schema(user, { minimize: false })
-const userModel = mongoose.model('userModel', userSchema, 'user')
+const User = mongoose.model('user', userSchema, 'user')
 module.exports = {
-  userModel
+  User
 }
