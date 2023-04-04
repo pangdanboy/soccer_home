@@ -18,8 +18,12 @@ export const DATE = {
 export const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'pageAdmin', 'page401']
 // 用户信息编辑类型
 export const EDIT_TYPE = {
+  // 基础信息编辑(用户名||个性签名)
   BASE_INFO_EDIT: 0,
+  // 绑定邮箱编辑
   EMAIL_EDIT: 1,
+  // 密码修改
   PASSWORD_EDIT: 2,
+  // 用户时间协作数据上传
   FREE_TIME_TABLE_EDIT: 3
 }

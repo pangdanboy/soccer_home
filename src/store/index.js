@@ -61,6 +61,13 @@ export default new Vuex.Store({
     },
     CLOSE_MESSAGE: (state, payload) => {
       state.message.status = false
+    },
+    SET_USER_STATUS: (state, payload) => {
+      state.UserInfo.loginStatus = payload.status
+    },
+    SET_USER_INFO: (state, payload) => {
+      state.UserInfo.role = payload.role
+      state.UserInfo.avatar = payload.avatar
     }
   },
   actions: {

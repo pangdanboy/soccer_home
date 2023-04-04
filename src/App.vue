@@ -22,19 +22,6 @@
               <span>消息中心</span>
             </v-tooltip>
           </router-link>
-          <router-link :to="USER_LOGIN_STATUS ? '/pageUserCenter' : '/pageLogin'" tag="span">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn icon v-bind="attrs" v-on="on" v-show="!USER_LOGIN_STATUS">
-                  <v-icon>mdi-account</v-icon>
-                </v-btn>
-                <v-avatar v-bind="attrs" v-on="on" v-show="USER_LOGIN_STATUS" style="cursor: pointer">
-                  <img :src="USER_AVATAR" alt="John">
-                </v-avatar>
-              </template>
-              <span>{{ USER_LOGIN_STATUS ? '个人中心' : '登录注册'}}</span>
-            </v-tooltip>
-          </router-link>
           <router-link to="/pageAdmin" tag="span" v-show="USER_ROLE === USER_PERMISSIONS.SUPER_ADMIN">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -43,6 +30,29 @@
                 </v-btn>
               </template>
               <span>管理员</span>
+            </v-tooltip>
+          </router-link>
+          <span class="logout" v-show="USER_LOGIN_STATUS">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on" @click="logout">
+                  <v-icon>mdi-logout-variant</v-icon>
+                </v-btn>
+              </template>
+              <span>退出登录</span>
+            </v-tooltip>
+          </span>
+          <router-link :to="USER_LOGIN_STATUS ? '/pageUserCenter' : '/pageLogin'" tag="span">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on" v-show="!USER_LOGIN_STATUS">
+                  <v-icon>mdi-account</v-icon>
+                </v-btn>
+                <v-avatar v-bind="attrs" v-on="on" v-show="USER_LOGIN_STATUS" style="cursor: pointer">
+                  <img :src="USER_AVATAR">
+                </v-avatar>
+              </template>
+              <span>{{ USER_LOGIN_STATUS ? '个人中心' : '登录注册'}}</span>
             </v-tooltip>
           </router-link>
         </template>
@@ -90,6 +100,7 @@
 import { mapGetters, mapMutations } from 'vuex'
 import { USER_PERMISSIONS, NOT_SHOW_NAV_PAGES } from '@/constant'
 import message from '@/components/message.vue'
+import { getCurrentUserInfo } from '@/http'
 export default {
   name: 'App',
   components: {
@@ -109,6 +120,7 @@ export default {
         this.toggleBtnShow = false
       }
     }
+    this.refreshUser()
   },
   computed: {
     ...mapGetters(['USER_LOGIN_STATUS', 'USER_AVATAR', 'USER_ROLE'])
@@ -123,7 +135,7 @@ export default {
     USER_PERMISSIONS
   }),
   methods: {
-    ...mapMutations(['OPEN_MESSAGE']),
+    ...mapMutations(['OPEN_MESSAGE', 'SET_USER_INFO', 'SET_USER_STATUS']),
     // 主题切换
     toggleTheme () {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark
@@ -141,16 +153,50 @@ export default {
         type: 'success',
         timeout: 2000
       })
+    },
+    // 更新用户登录状态和信息
+    refreshUser () {
+      if (localStorage.getItem('userToken')) {
+        this.SET_USER_STATUS({
+          status: true
+        })
+        getCurrentUserInfo().then(res => {
+          console.log(res)
+          this.SET_USER_INFO({
+            role: res.data.role,
+            avatar: res.data.avatar
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.SET_USER_STATUS({
+          status: false
+        })
+        this.SET_USER_INFO({
+          role: '0',
+          avatar: ''
+        })
+      }
+    },
+    // 退出登录
+    logout () {
+      localStorage.removeItem('userToken')
+      this.refreshUser()
     }
   },
   watch: {
     $route: {
       // 监听路由，控制导航栏的显示与隐藏
       handler (newVal, oldVal) {
+        console.log(newVal, oldVal)
         if (NOT_SHOW_NAV_PAGES.includes(newVal.name)) {
           this.navShow = false
         } else {
           this.navShow = true
+        }
+        if (oldVal.name === 'pageLogin') {
+          this.refreshUser()
         }
       },
       deep: true
@@ -169,6 +215,9 @@ export default {
     }
     .main-top{
       margin-top: 120px;
+    }
+    .logout{
+      margin-right: 10px;
     }
   }
   ::v-deep .v-toolbar__content{

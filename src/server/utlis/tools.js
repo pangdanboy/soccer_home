@@ -50,7 +50,7 @@ function sendEmail (receiveEmail, verifyCode) {
                     <div style="line-height:1.5;font-size:14px;margin-bottom:25px;color:#4d4d4d;">
                         <strong style="display:block;margin-bottom:15px;">尊敬的用户：<span style="color:#f60;font-size: 16px;"></span>您好！</strong>
                         <strong style="display:block;margin-bottom:15px;">
-                            您正在进行<span style="color: red">口袋觉醒个人攻略网站账号注册</span>操作，请在验证码输入框中输入：<span style="color:#f60;font-size: 24px">${verifyCode}</span>，以完成操作。
+                            您正在进行<span style="color: red">足球小窝网站注册</span>操作，请在验证码输入框中输入：<span style="color:#f60;font-size: 24px">${verifyCode}</span>，以完成操作。
                         </strong>
                     </div>
                     <div style="margin-bottom:30px;">
@@ -83,10 +83,24 @@ function sendEmail (receiveEmail, verifyCode) {
     if (error) {
       code = false
     }
-    console.log('邮件发送成功 ID：', info.messageId)
   })
   return code
 }
+
+/**
+ * 生成指定范围随机数
+ * @param Min
+ * @param Max
+ * @returns {*}
+ */
+function random (Min, Max) {
+  const Range = Max - Min
+  const Rand = Math.random()
+  const num = Min + Math.round(Rand * Range)
+  return num
+}
+
 module.exports = {
-  sendEmail
+  sendEmail,
+  random
 }

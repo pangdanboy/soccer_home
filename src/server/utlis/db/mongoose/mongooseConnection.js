@@ -3,9 +3,8 @@ const { MongoDB } = require('./../../../global/config')
 // 默认连接
 const defaultMongoDBConnection = () => {
   mongoose.set('strictQuery', true)
-  mongoose.connect(MongoDB.MongoDBAddress).then(res => {
+  mongoose.connect(MongoDB.MongoDBAddress + MongoDB.MongoDBDatabase).then(res => {
     console.log('MongoDB connected')
-    mongoose.connection.useDb(MongoDB.MongoDBDatabase)
   }).catch(err => {
     console.log('MongoDB connect failed', err)
   })

@@ -8,6 +8,10 @@ const user = {
     type: String,
     require: true
   },
+  avatar: {
+    type: String,
+    require: true
+  },
   email: {
     type: String,
     required: true

@@ -10,3 +10,10 @@ export const getWeekDays = () => {
   }
   return weekDays
 }
+// 生成指定范围内的随机数
+export const random = (Min, Max) => {
+  const Range = Max - Min
+  const Rand = Math.random()
+  const num = Min + Math.round(Rand * Range)
+  return num
+}

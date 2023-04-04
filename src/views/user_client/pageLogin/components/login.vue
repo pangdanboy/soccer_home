@@ -41,6 +41,8 @@
 
 <script>
 import { mapMutations } from 'vuex'
+import { login } from '@/http'
+
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'login',
@@ -59,13 +61,39 @@ export default {
   }),
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
+    // 重置表单校验信息
     reset () {
       this.$refs.form.reset()
     },
+    // 处理登录
     login () {
       const verify = this.$refs.form.validate()
+      // 用户信息填写完整，调用登录接口，验证用户信息
       if (verify) {
         console.log('调用接口验证用户登录信息')
+        login({
+          email: this.email,
+          password: this.password
+        }).then(res => {
+          console.log(res)
+          if (res.success) {
+            localStorage.setItem('userToken', res.data.token)
+            this.$router.replace('/pageHome')
+          }
+          this.OPEN_MESSAGE({
+            content: res.message,
+            type: res.success ? 'success' : 'error',
+            timeout: 3000
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.OPEN_MESSAGE({
+          content: '请填写完整信息！',
+          type: 'warning',
+          timeout: 3000
+        })
       }
     },
     jumpRegister () {

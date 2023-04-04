@@ -8,6 +8,7 @@
 <script>
 import timeTable from '@/components/timeTable.vue'
 import { getWeekDays } from '@/utils'
+
 export default {
   name: 'pageHome',
   components: {
@@ -23,6 +24,8 @@ export default {
   }),
   mounted () {
     this.weekDayDate = getWeekDays()
+  },
+  methods: {
   }
 }
 </script>
