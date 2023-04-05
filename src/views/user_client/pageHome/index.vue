@@ -1,18 +1,19 @@
 <template>
   <div id="home">
+    <div class="match"></div>
     <div class="match-list"></div>
-    <time-table :free-time-list="freeTimeList" :week-day-date="weekDayDate" :match-time-list="matchTimeList"></time-table>
+<!--    <time-table :free-time-list="freeTimeList" :week-day-date="weekDayDate" :match-time-list="matchTimeList"></time-table>-->
   </div>
 </template>
 
 <script>
-import timeTable from '@/components/timeTable.vue'
+// import timeTable from '@/components/timeTable.vue'
 import { getWeekDays } from '@/utils'
 
 export default {
   name: 'pageHome',
   components: {
-    timeTable
+    // timeTable
   },
   data: () => ({
     // 用户每周空闲时间列表

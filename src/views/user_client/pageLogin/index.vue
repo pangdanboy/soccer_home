@@ -2,7 +2,7 @@
   <div id="login_register">
     <div class="page-main">
       <div class="page-left"></div>
-      <div class="page-right">
+      <div class="page-right" :class="showLogin ? '':'max-height'">
         <login v-show="showLogin" @jumpRegister="jumpRegister"></login>
         <register v-show="!showLogin" @jumpLogin="jumpLogin"></register>
       </div>
@@ -58,6 +58,9 @@ export default {
         align-items: center;
         justify-content: center;
         border-radius: 5px;
+      }
+      .max-height{
+        height: 600px;
       }
     }
   }

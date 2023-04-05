@@ -1,6 +1,6 @@
 <template>
   <div class="register">
-    <v-form ref="form" v-model="valid" lazy-validation style="width: 450px; height: 500px; padding: 40px">
+    <v-form ref="form" v-model="valid" lazy-validation style="width: 100%; height: 100%; padding: 40px">
       <div class="title">
         <p style="font-size: 24px; font-weight: bold;">注册</p>
       </div>
@@ -37,6 +37,12 @@
         clearable
         :counter="16"
         type="password"
+      ></v-text-field>
+      <v-text-field
+        v-model="secretKey"
+        label="管理员密钥(选填)"
+        clearable
+        :counter="6"
       ></v-text-field>
       <div class="register-policy">
         <v-checkbox
@@ -87,6 +93,8 @@ export default {
       v => !!v || '验证码不能为空！',
       v => v.length <= 6 || '长度不能超过6！'
     ],
+    // 管理员密钥，可选
+    secretKey: '',
     checkbox: false,
     valid: false,
     verifyProcess: false,
@@ -183,7 +191,7 @@ export default {
 <style scoped lang="scss">
   .register{
     width: 450px;
-    height: 550px;
+    height: 600px;
     .v-form{
       display: flex;
       flex-direction: column;

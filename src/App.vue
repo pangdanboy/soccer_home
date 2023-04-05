@@ -11,7 +11,7 @@
           <!-- 标题 -->
           <v-toolbar-title>足球小窝</v-toolbar-title>
           <v-spacer></v-spacer>
-          <!-- 路由入口，消息中心和用户中心以及管理员入口 -->
+          <!-- 路由入口，消息中心、用户中心、登出、赛事中心、以及管理员入口 -->
           <router-link to="/pageMessageCenter" tag="span">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -71,6 +71,14 @@
           <router-view></router-view>
         </v-container>
       </v-main>
+      <!-- 页脚 -->
+      <v-footer color="primary lighten-1" padless>
+        <v-row justify="center" no-gutters>
+          <v-col class="primary lighten-2 py-4 text-center white--text" cols="12">
+            {{ new Date().getFullYear() }} — <strong>SOCCER_HOME</strong>
+          </v-col>
+        </v-row>
+      </v-footer>
     </v-card>
     <!-- 页面滚动到顶部按钮以及主题切换 -->
     <div class="tool-box" v-show="toggleBtnShow">
@@ -147,11 +155,6 @@ export default {
         top: 0,
         left: 0,
         behavior: 'smooth'
-      })
-      this.OPEN_MESSAGE({
-        content: '这是一个提示',
-        type: 'success',
-        timeout: 2000
       })
     },
     // 更新用户登录状态和信息

@@ -11,6 +11,7 @@
     "dev": "concurrently \"npm run server\" \"npm run serve\""
   },
   "dependencies": {
+    "@mdi/font": "^7.2.96",
     "axios": "^1.2.0",
     "concurrently": "^7.6.0",
     "core-js": "^3.8.3",

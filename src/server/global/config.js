@@ -18,15 +18,15 @@ const USER_PERMISSIONS = {
   ADMIN: '1',
   COMMON_USER: '0'
 }
-// 通用访问路由(所有用户都可以访问的路由)
-const commonRoutes = []
+// 通用访问路由(所有登录用户都可以访问的路由)
+const commonRoutes = ['pageHome', 'pageLogin', 'pageMessageCenter', 'pageNews', 'pageCommunity', 'pageUserCenter']
 // 用户角色权限访问路由限制
 const userRoleToRoute = {
   SUPER_ADMIN: {
     // 前后端统一的匹配key值
     key: USER_PERMISSIONS.SUPER_ADMIN,
     // 用户可以访问的路由
-    routes: [...commonRoutes]
+    routes: [...commonRoutes, 'pageAdmin']
   },
   ADMIN: {
     key: USER_PERMISSIONS.ADMIN,
