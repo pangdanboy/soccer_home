@@ -72,7 +72,7 @@
         </v-container>
       </v-main>
       <!-- 页脚 -->
-      <v-footer color="primary lighten-1" padless>
+      <v-footer color="primary lighten-1" padless v-show="navShow">
         <v-row justify="center" no-gutters>
           <v-col class="primary lighten-2 py-4 text-center white--text" cols="12">
             {{ new Date().getFullYear() }} — <strong>SOCCER_HOME</strong>

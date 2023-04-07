@@ -6,7 +6,7 @@ export const getWeekDays = () => {
   const weekOfDay = parseInt(moment().format('E'))
   const weekDays = []
   for (let i = 1; i <= 7; i++) {
-    weekDays.push(moment().startOf('day').subtract(weekOfDay - i, 'days').format('YYYY/MM/DD'))
+    weekDays.push(moment().startOf('day').subtract(weekOfDay - i, 'days').format('YYYY-MM-DD'))
   }
   return weekDays
 }

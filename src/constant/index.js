@@ -27,3 +27,9 @@ export const EDIT_TYPE = {
   // 用户时间协作数据上传
   FREE_TIME_TABLE_EDIT: 3
 }
+// 足球比赛类型
+export const MATCH_TYPE = {
+  FREE_MATCH: '自由比赛',
+  CLASS_MATCH: '课程比赛',
+  LEAGUE_MATCH: '联盟比赛'
+}
