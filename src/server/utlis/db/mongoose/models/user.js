@@ -26,7 +26,7 @@ const user = {
   },
   freeTimeList: {
     type: Array,
-    required: true
+    require: true
   },
   createTime: {
     type: Date,

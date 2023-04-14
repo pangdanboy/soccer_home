@@ -1,7 +1,6 @@
 <template>
   <div id="time_table">
     <v-container fluid style="background-color: rgba(255, 255, 255, 0.5);">
-      <v-row></v-row>
       <v-row v-for="weekItem in timeData" :key="weekItem.id">
         <v-col style="border: 1px solid #ccc; font-size: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center">
           <span>{{ DATE[weekItem.name] }}</span>
@@ -14,19 +13,19 @@
               <v-icon v-show="day.free" size="36">mdi-soccer-field</v-icon>
               <v-icon v-show="!day.free" size="36">mdi-book-open-variant</v-icon>
             </v-card-text>
-            <v-card-actions v-show="freeTimeList.length === 0">
+            <v-card-actions v-show="timeTableType === 'operation'">
               <v-btn color="error" v-show="day.free" @click="setBusy(day)">设为繁忙</v-btn>
               <v-btn color="primary" v-show="!day.free" @click="setFree(day)">设为空闲</v-btn>
             </v-card-actions>
-            <v-card-actions v-show="freeTimeList.length !== 0">
-              <v-btn color="error" v-show="day.free" @click="setBusy(day)">设为繁忙</v-btn>
-              <v-btn color="primary" v-show="!day.free" @click="setFree(day)">设为空闲</v-btn>
+            <v-card-actions v-show="timeTableType === 'check'">
+              <v-btn color="primary" @click="setBusy(day)" v-show="day.free">查看比赛</v-btn>
+              <v-btn color="primary" @click="setFree(day)" v-show="!day.free" disabled>暂无比赛</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
       <v-row style="display: flex; align-items: center; justify-content: center; padding: 20px 0px 10px 0px">
-        <v-btn class="primary" style="width: 100px; height: 45px;" :disabled="saveBtn">保存</v-btn>
+        <v-btn class="primary" style="width: 100px; height: 45px;" :disabled="saveBtn" v-show="timeTableType === 'operation'">保存</v-btn>
       </v-row>
     </v-container>
   </div>
@@ -45,27 +44,33 @@ export default {
         timeList: [
           {
             id: '1-1',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '1-2',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '1-3',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '1-4',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '1-5',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '1-6',
-            free: true
+            free: true,
+            haveMatch: false
           }
         ]
       },
@@ -76,27 +81,33 @@ export default {
         timeList: [
           {
             id: '2-1',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '2-2',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '2-3',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '2-4',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '2-5',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '2-6',
-            free: true
+            free: true,
+            haveMatch: false
           }
         ]
       },
@@ -107,27 +118,33 @@ export default {
         timeList: [
           {
             id: '3-1',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '3-2',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '3-3',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '3-4',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '3-5',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '3-6',
-            free: true
+            free: true,
+            haveMatch: false
           }
         ]
       },
@@ -138,27 +155,33 @@ export default {
         timeList: [
           {
             id: '4-1',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '4-2',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '4-3',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '4-4',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '4-5',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '4-6',
-            free: true
+            free: true,
+            haveMatch: false
           }
         ]
       },
@@ -169,27 +192,33 @@ export default {
         timeList: [
           {
             id: '5-1',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '5-2',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '5-3',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '5-4',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '5-5',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '5-6',
-            free: true
+            free: true,
+            haveMatch: false
           }
         ]
       },
@@ -200,27 +229,33 @@ export default {
         timeList: [
           {
             id: '6-1',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '6-2',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '6-3',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '6-4',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '6-5',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '6-6',
-            free: true
+            free: true,
+            haveMatch: false
           }
         ]
       },
@@ -231,27 +266,33 @@ export default {
         timeList: [
           {
             id: '7-1',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '7-2',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '7-3',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '7-4',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '7-5',
-            free: true
+            free: true,
+            haveMatch: false
           },
           {
             id: '7-6',
-            free: true
+            free: true,
+            haveMatch: false
           }
         ]
       }
@@ -279,19 +320,16 @@ export default {
       type: Array,
       // eslint-disable-next-line vue/require-valid-default-prop
       default: []
+    },
+    // 当前时间表类型: 用户查看比赛(check)||用户设置时间协作数据
+    timeTableType: {
+      type: String,
+      default: ''
     }
   },
   beforeMount () {
-    // 根据用户当前的空闲时间列表处理渲染数据
-    if (this.freeTimeList.length !== 0) {
-      this.timeData.forEach((weekItem) => {
-        weekItem.timeList.forEach((day) => {
-          if (!this.freeTimeList.includes(day.id)) {
-            day.free = false
-          }
-        })
-      })
-    }
+    // 根据用户当前的空闲时间在课表上标记用户空闲时间
+    // 根据比赛列表时间标记
   },
   methods: {
     setBusy (day) {
@@ -312,6 +350,26 @@ export default {
       this.timeData.forEach((weekItem, index) => {
         weekItem.date = this.weekDayDate[index]
       })
+    },
+    freeTimeList: function () {
+      console.log('标记用户空闲时间')
+      this.timeData.forEach((weekItem) => {
+        weekItem.timeList.forEach((day) => {
+          if (!this.freeTimeList.includes(day.id)) {
+            day.free = false
+          }
+        })
+      })
+    },
+    matchTimeList: function () {
+      console.log('标记比赛时间')
+      this.timeData.forEach((weekItem) => {
+        weekItem.timeList.forEach((day) => {
+          if (this.matchTimeList.includes(day.id)) {
+            day.haveMatch = true
+          }
+        })
+      })
     }
   }
 }
@@ -322,5 +380,6 @@ export default {
     padding: 15px;
     background-image: url('./../static/images/timeTable.jpg');
     background-size: cover;
+    width: 100%;
   }
 </style>

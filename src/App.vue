@@ -59,7 +59,7 @@
         <!-- 导航栏 -->
         <template v-slot:extension>
           <v-tabs align-with-title>
-            <v-tab to="/pageHome">主页</v-tab>
+            <v-tab to="/pageHome">赛事中心</v-tab>
             <v-tab to="/pageNews">新闻</v-tab>
             <v-tab to="/pageCommunity">社区</v-tab>
           </v-tabs>
@@ -108,7 +108,7 @@
 import { mapGetters, mapMutations } from 'vuex'
 import { USER_PERMISSIONS, NOT_SHOW_NAV_PAGES } from '@/constant'
 import message from '@/components/message.vue'
-import { getCurrentUserInfo } from '@/http'
+import { getCurrentUserInfo } from '@/http/user'
 export default {
   name: 'App',
   components: {

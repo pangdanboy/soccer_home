@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import { register, getVerify } from '@/http'
+import { register, getVerify } from '@/http/user'
 import { USER_PERMISSIONS } from '@/constant'
 import { mapMutations } from 'vuex'
 

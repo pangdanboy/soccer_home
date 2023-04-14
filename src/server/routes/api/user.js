@@ -328,4 +328,8 @@ router.get('/getUserById', (req, res) => {
   })
 })
 
+/**
+ * 用户api，用于用户的登录注册和信息修改
+ * @type {Router}
+ */
 module.exports = router

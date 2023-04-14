@@ -66,9 +66,41 @@ const routes = [
     }
   },
   {
-    path: '/pageAdmin',
-    name: 'pageAdmin',
-    component: () => import('../views/admin_client/index.vue'),
+    path: '/pageAdmin/overview',
+    name: 'overview',
+    component: () => import('../views/admin_client/overview/index.vue'),
+    meta: {
+      isAuth: true
+    }
+  },
+  {
+    path: '/pageAdmin/matchManage',
+    name: 'matchManage',
+    component: () => import('../views/admin_client/matchManage/index.vue'),
+    meta: {
+      isAuth: true
+    }
+  },
+  {
+    path: '/pageAdmin/areaManage',
+    name: 'areaManage',
+    component: () => import('../views/admin_client/areaManage/index.vue'),
+    meta: {
+      isAuth: true
+    }
+  },
+  {
+    path: '/pageAdmin/userManage',
+    name: 'userManage',
+    component: () => import('../views/admin_client/userManage/index.vue'),
+    meta: {
+      isAuth: true
+    }
+  },
+  {
+    path: '/pageAdmin/communityManage',
+    name: 'communityManage',
+    component: () => import('../views/admin_client/communityManage/index.vue'),
     meta: {
       isAuth: true
     }
@@ -88,8 +120,9 @@ router.beforeEach((to, from, next) => {
     // 进行用户的权限校验，先判断用户是否登录，如果未登录，跳转到登录页
     if (!localStorage.getItem('userToken')) {
       router.push('/page401/NoLogin')
-    } else { // 用户登录之后，获取用户信息校验用户角色
+    } else { // 用户登录之后，调用接口校验用户角色是否有权限进入该路由
       // const userRole = localStorage.getItem('user_role')
+      next()
     }
   } else if (to.name === 'pageLogin') {
     // 进入登录页，如果用户已经登录，跳转到主页

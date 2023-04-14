@@ -41,7 +41,7 @@
 
 <script>
 import { mapMutations } from 'vuex'
-import { login } from '@/http'
+import { login } from '@/http/user'
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
