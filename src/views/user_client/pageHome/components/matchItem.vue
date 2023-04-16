@@ -91,7 +91,7 @@ export default {
       }
     }
   }
-  @media screen and (min-width: 1281px){
+  @media screen and (min-width: 1411px){
     #match_item{
       height: 360px;
       .match-cover{

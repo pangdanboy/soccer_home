@@ -11,7 +11,7 @@
           <!-- 标题 -->
           <v-toolbar-title>足球小窝</v-toolbar-title>
           <v-spacer></v-spacer>
-          <!-- 路由入口，消息中心、用户中心、登出、赛事中心、以及管理员入口 -->
+          <!-- 路由入口，消息中心、用户中心、登出、创建比赛、以及管理员入口 -->
           <router-link to="/pageMessageCenter" tag="span">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -30,6 +30,16 @@
                 </v-btn>
               </template>
               <span>管理员</span>
+            </v-tooltip>
+          </router-link>
+          <router-link to="/pageMatch" tag="span" v-show="USER_ROLE !== USER_PERMISSIONS.COMMON_USER">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-soccer</v-icon>
+                </v-btn>
+              </template>
+              <span>创建比赛</span>
             </v-tooltip>
           </router-link>
           <span class="logout" v-show="USER_LOGIN_STATUS">

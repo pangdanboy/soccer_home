@@ -228,7 +228,7 @@ export default {
         }
       }
     }
-    @media screen and (min-width: 1281px) {
+    @media screen and (min-width: 1411px) {
       .user-nav{
         .v-card{
           height: 850px !important;
