@@ -73,6 +73,7 @@
           <time-table :time-table-type="timeTableType"></time-table>
         </v-card>
       </div>
+      <!-- 修改信息-->
       <v-dialog
         transition="dialog-top-transition"
         max-width="600"

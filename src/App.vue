@@ -6,7 +6,7 @@
         <template v-slot:default>
           <!-- logo -->
           <v-avatar size="49" style="margin-right: 15px;">
-            <img src="" alt="">
+            <img src="./static/images/logo.jpg" alt="">
           </v-avatar>
           <!-- 标题 -->
           <v-toolbar-title>足球小窝</v-toolbar-title>
@@ -29,7 +29,7 @@
                   <v-icon>mdi-account-lock-open</v-icon>
                 </v-btn>
               </template>
-              <span>管理员</span>
+              <span>后台管理</span>
             </v-tooltip>
           </router-link>
           <router-link to="/pageMatch" tag="span" v-show="USER_ROLE !== USER_PERMISSIONS.COMMON_USER">
@@ -195,6 +195,11 @@ export default {
     // 退出登录
     logout () {
       localStorage.removeItem('userToken')
+      this.OPEN_MESSAGE({
+        content: '已退出系统',
+        type: 'success',
+        timeout: 3000
+      })
       this.refreshUser()
     }
   },
