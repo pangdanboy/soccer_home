@@ -306,24 +306,25 @@ export default {
     // 用户空闲时间
     freeTimeList: {
       type: Array,
-      // eslint-disable-next-line vue/require-valid-default-prop
-      default: []
+      required: false,
+      default: () => []
     },
     // 比赛时间列表
     matchTimeList: {
       type: Array,
-      // eslint-disable-next-line vue/require-valid-default-prop
-      default: []
+      required: false,
+      default: () => []
     },
     // 当前周的日期
     weekDayDate: {
       type: Array,
-      // eslint-disable-next-line vue/require-valid-default-prop
-      default: []
+      required: false,
+      default: () => []
     },
     // 当前时间表类型: 用户查看比赛(check)||用户设置时间协作数据
     timeTableType: {
       type: String,
+      required: true,
       default: ''
     }
   },

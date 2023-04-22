@@ -77,14 +77,16 @@ function sendEmail (receiveEmail, verifyCode) {
     </body>
 `
   }
-  let code = true
-  // 发送邮件
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      code = false
-    }
+  return new Promise((resolve, reject) => {
+    // 发送邮件
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve('发送成功')
+      }
+    })
   })
-  return code
 }
 
 /**

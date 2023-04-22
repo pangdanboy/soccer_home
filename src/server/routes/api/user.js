@@ -147,23 +147,25 @@ router.post('/login', (req, res) => {
  */
 router.get('/verify', (req, res) => {
   const verifyCode = Math.floor(Math.random() * 1000000)
-  const code = sendEmail(req.query.email, verifyCode)
-  if (code) {
+  sendEmail(req.query.email, verifyCode).then(res => {
     return res.json({
       code: 200,
       data: {
         email: req.query.email,
         verifyCode: verifyCode
       },
-      message: '发送验证码成功！',
+      message: res,
       success: true
     })
-  }
-  return res.json({
-    code: 404,
-    data: {},
-    message: '邮箱不存在！',
-    success: false
+  }).catch(err => {
+    return res.json({
+      code: 404,
+      data: {
+        err
+      },
+      message: '邮箱不存在！',
+      success: false
+    })
   })
 })
 

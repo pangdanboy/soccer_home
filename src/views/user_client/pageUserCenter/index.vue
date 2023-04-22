@@ -85,8 +85,64 @@
             dark
           >{{ dialogConfig.type === 'base'? '修改信息':'修改密码' }}</v-toolbar>
           <v-card-text>
-            <div class="edit-base"></div>
-            <div class="edit-password"></div>
+            <div class="edit-base" v-show="dialogConfig.type === 'base'">
+              <v-form ref="editBaseInfoForm" v-model="editBaseInfoValid">
+                <v-text-field
+                  v-model="dialogConfig.editInfo.username"
+                  :rules="usernameRules"
+                  label="用户名"
+                  :counter="16"
+                  required
+                  clearable
+                ></v-text-field>
+                <v-text-field
+                  v-model="dialogConfig.editInfo.signature"
+                  :rules="signatureRules"
+                  label="个性签名"
+                  :counter="16"
+                  required
+                  clearable
+                ></v-text-field>
+                <v-text-field
+                  v-model="dialogConfig.editInfo.email"
+                  :rules="emailRules"
+                  label="邮箱"
+                  required
+                  clearable
+                ></v-text-field>
+                <div class="code" style="display: flex; align-items: center">
+                  <v-text-field
+                    v-model="dialogConfig.editInfo.code"
+                    label="验证码"
+                    required
+                    clearable
+                    :disabled="verifyCode.length === 0"
+                    style="margin-right: 10px"
+                  ></v-text-field>
+                  <v-btn @click="handleVerify" :disabled="verifyProcess || dialogConfig.editInfo.email === userInfo.email  ">{{ verifyProcess ? countDown:'获取验证码' }}</v-btn>
+                </div>
+              </v-form>
+            </div>
+            <div class="edit-password" v-show="dialogConfig.type === 'password'">
+              <v-form ref="editPasswordForm" v-model="editPasswordValid">
+                <v-text-field
+                  v-model="dialogConfig.editInfo.newPassword"
+                  :rules="passwordRules"
+                  label="新的密码"
+                  :counter="16"
+                  required
+                  clearable
+                ></v-text-field>
+                <v-text-field
+                  v-model="dialogConfig.editInfo.confirmPassword"
+                  :rules="passwordRules"
+                  label="确认密码"
+                  required
+                  clearable
+                  :counter="16"
+                ></v-text-field>
+              </v-form>
+            </div>
           </v-card-text>
           <v-card-actions class="justify-end">
             <v-btn
@@ -95,8 +151,15 @@
             >关闭</v-btn>
             <v-btn
               color="primary"
-              @click="dialogConfig.open = false"
-            >保存</v-btn>
+              v-show="dialogConfig.type === 'base'"
+              :disabled="!editBaseInfo"
+              @click="baseInfoEdit"
+            >修改</v-btn>
+            <v-btn
+              color="primary"
+              v-show="dialogConfig.type === 'password'"
+              @click="passwordEdit"
+            >修改</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -104,8 +167,9 @@
 </template>
 
 <script>
-import { getCurrentUserInfo } from '@/http/user'
+import { getCurrentUserInfo, getVerify } from '@/http/user'
 import { USER_LEVEL } from '@/constant'
+import { mapMutations } from 'vuex'
 import timeTable from '@/components/timeTable.vue'
 
 export default {
@@ -140,7 +204,36 @@ export default {
       editInfo: {},
       type: '',
       event: ''
-    }
+    },
+    // 修改基本信息表单校验标志
+    editBaseInfoValid: false,
+    // 基本信息是否发生变化
+    editBaseInfo: false,
+    // 修改密码表单校验标志
+    editPasswordValid: false,
+    // 基本信息校验规则
+    usernameRules: [
+      v => !!v || '昵称不能为空！',
+      v => v.length <= 16 || '长度不能超过16！'
+    ],
+    signatureRules: [
+      v => !!v || '个性签名不能为空！',
+      v => v.length <= 16 || '长度不能超过16！'
+    ],
+    emailRules: [
+      v => !!v || '邮箱不能为空！',
+      v => /.+@.+\..+/.test(v) || '邮箱格式不正确！'
+    ],
+    // 密码校验规则
+    passwordRules: [
+      v => !!v || '密码不能为空！',
+      v => v.length <= 16 || '长度不能超过16！'
+    ],
+    // 验证码相关
+    verifyProcess: false,
+    verifyTimer: null,
+    countDown: 60,
+    verifyCode: ''
   }),
   computed: {
     userLevel: function () {
@@ -151,6 +244,7 @@ export default {
     this.getUserInfo()
   },
   methods: {
+    ...mapMutations(['OPEN_MESSAGE']),
     getUserInfo () {
       getCurrentUserInfo().then(res => {
         if (res.success) {
@@ -167,6 +261,98 @@ export default {
       console.log(type)
       this.dialogConfig.open = true
       this.dialogConfig.type = type
+      this.dialogConfig.editInfo = JSON.parse(JSON.stringify(this.userInfo))
+      this.dialogConfig.editInfo.newPassword = ''
+      this.dialogConfig.editInfo.confirmPassword = ''
+    },
+    handleVerify () {
+      // 校验邮箱格式
+      const emailVerify = /.+@.+\..+/.test(this.dialogConfig.editInfo.email)
+      if (emailVerify) {
+        // 向邮箱发送验证码
+        getVerify({
+          email: this.dialogConfig.editInfo.email
+        }).then(res => {
+          if (res.success) {
+            this.verifyCode = res.data.verifyCode
+            this.verifyProcess = true
+            this.verifyTimer = setInterval(() => {
+              this.countDown -= 1
+              if (this.countDown === 0) {
+                clearInterval(this.verifyTimer)
+                this.verifyProcess = false
+                this.countDown = 60
+              }
+            }, 1000)
+          }
+          this.OPEN_MESSAGE({
+            content: res.message,
+            type: res.success ? 'success' : 'error',
+            timeout: 2000
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.OPEN_MESSAGE({
+          content: '邮箱格式错误！',
+          type: 'error',
+          timeout: 3000
+        })
+      }
+    },
+    baseInfoEdit () {
+      // 调用表单校验方法
+      const editBaseInfoForm = this.$refs.editBaseInfoForm.validate()
+      if (editBaseInfoForm) {
+        // 判断邮箱是否发生修改，如果修改了，需要校验验证码
+        if (this.dialogConfig.editInfo.email !== this.userInfo.email && !this.verifyCode) {
+          this.OPEN_MESSAGE({
+            content: '请校验邮箱',
+            type: 'warning',
+            timeout: 3000
+          })
+          return
+        }
+        // 校验验证码
+        if (!this.dialogConfig.code) {
+          this.OPEN_MESSAGE({
+            content: '请填写验证码',
+            type: 'warning',
+            timeout: 3000
+          })
+        } else if (this.dialogConfig.code !== this.verifyCode) {
+          this.OPEN_MESSAGE({
+            content: '验证码错误',
+            type: 'error',
+            timeout: 3000
+          })
+        } else {
+          console.log('调用接口修改信息')
+        }
+      } else {
+        this.OPEN_MESSAGE({
+          content: '请检查你填写的信息',
+          type: 'error',
+          timeout: 3000
+        })
+      }
+    },
+    passwordEdit () {
+    }
+  },
+  watch: {
+    dialogConfig: {
+      handler (n, o) {
+        if (n.editInfo.username !== this.userInfo.username ||
+            n.editInfo.signature !== this.userInfo.signature ||
+            n.editInfo.email !== this.userInfo.email) {
+          this.editBaseInfo = true
+        } else {
+          this.editBaseInfo = false
+        }
+      },
+      deep: true
     }
   }
 }
