@@ -3,7 +3,7 @@
     <v-container fluid style="background-color: rgba(255, 255, 255, 0.5);">
       <v-row v-for="weekItem in timeData" :key="weekItem.id">
         <v-col style="border: 1px solid #ccc; font-size: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center">
-          <span>{{ DATE[weekItem.name] }}</span>
+          <span>{{ weekItem.name }}</span>
           <span>{{ weekItem.date }}</span>
         </v-col>
         <v-col v-for="(day, index) in weekItem.timeList" :key="day.id" style="border: 1px solid #ccc">
@@ -25,285 +25,25 @@
         </v-col>
       </v-row>
       <v-row style="display: flex; align-items: center; justify-content: center; padding: 20px 0px 10px 0px">
-        <v-btn class="primary" style="width: 100px; height: 45px;" :disabled="saveBtn" v-show="timeTableType === 'operation'">保存</v-btn>
+        <v-btn class="primary" style="width: 100px; height: 45px;" :disabled="saveBtn" v-show="timeTableType === 'operation'" @click="saveFreeTimeList">保存</v-btn>
       </v-row>
     </v-container>
   </div>
 </template>
 
 <script>
-import { DATE } from '@/constant'
+import { createTimeTableData } from '@/utils'
+
 export default {
   name: 'timeTable',
   data: () => ({
-    timeData: [
-      {
-        name: 'Monday',
-        date: '',
-        id: '1',
-        timeList: [
-          {
-            id: '1-1',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '1-2',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '1-3',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '1-4',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '1-5',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '1-6',
-            free: true,
-            haveMatch: false
-          }
-        ]
-      },
-      {
-        name: 'Tuesday',
-        date: '',
-        id: '2',
-        timeList: [
-          {
-            id: '2-1',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '2-2',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '2-3',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '2-4',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '2-5',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '2-6',
-            free: true,
-            haveMatch: false
-          }
-        ]
-      },
-      {
-        name: 'Wednesday',
-        date: '',
-        id: '3',
-        timeList: [
-          {
-            id: '3-1',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '3-2',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '3-3',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '3-4',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '3-5',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '3-6',
-            free: true,
-            haveMatch: false
-          }
-        ]
-      },
-      {
-        name: 'Thursday',
-        date: '',
-        id: '4',
-        timeList: [
-          {
-            id: '4-1',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '4-2',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '4-3',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '4-4',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '4-5',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '4-6',
-            free: true,
-            haveMatch: false
-          }
-        ]
-      },
-      {
-        name: 'Friday',
-        date: '',
-        id: '5',
-        timeList: [
-          {
-            id: '5-1',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '5-2',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '5-3',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '5-4',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '5-5',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '5-6',
-            free: true,
-            haveMatch: false
-          }
-        ]
-      },
-      {
-        name: 'Saturday',
-        date: '',
-        id: '6',
-        timeList: [
-          {
-            id: '6-1',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '6-2',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '6-3',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '6-4',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '6-5',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '6-6',
-            free: true,
-            haveMatch: false
-          }
-        ]
-      },
-      {
-        name: 'weekday',
-        date: '',
-        id: '7',
-        timeList: [
-          {
-            id: '7-1',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '7-2',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '7-3',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '7-4',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '7-5',
-            free: true,
-            haveMatch: false
-          },
-          {
-            id: '7-6',
-            free: true,
-            haveMatch: false
-          }
-        ]
-      }
-    ],
+    timeData: createTimeTableData(),
     saveBtn: true,
-    // 用户可以参加比赛列表
-    canJoinMatchList: [],
-    DATE
+    // 待修改的用户空闲时间列表
+    UserFreeTimeList: []
   }),
   props: {
-    // 用户空闲时间
+    // 用户空闲时间列表
     freeTimeList: {
       type: Array,
       required: false,
@@ -335,6 +75,12 @@ export default {
   methods: {
     setBusy (day) {
       console.log(day.id)
+      // 把当前时间从用户空闲时间列表中移除
+      this.UserFreeTimeList.forEach((item, index) => {
+        if (item === day.id) {
+          this.UserFreeTimeList.splice(index, 1)
+        }
+      })
       this.saveBtn = false
       day.free = false
     },
@@ -342,6 +88,12 @@ export default {
       console.log(day.id)
       this.saveBtn = false
       day.free = true
+      // 将当前时间添加到用户空闲时间列表中
+      this.UserFreeTimeList.push(day.id)
+    },
+    saveFreeTimeList () {
+      this.$emit('freeTimeListEdit', this.UserFreeTimeList)
+      this.saveBtn = true
     }
   },
   watch: {
@@ -352,12 +104,14 @@ export default {
         weekItem.date = this.weekDayDate[index]
       })
     },
-    freeTimeList: function () {
+    freeTimeList: function (newVal, oldVal) {
       console.log('标记用户空闲时间')
+      // 初始化待修改的用户空闲时间列表
+      this.UserFreeTimeList = newVal
       this.timeData.forEach((weekItem) => {
-        weekItem.timeList.forEach((day) => {
-          if (!this.freeTimeList.includes(day.id)) {
-            day.free = false
+        weekItem.timeList.forEach((classItem) => {
+          if (this.freeTimeList.includes(classItem.id)) {
+            classItem.free = true
           }
         })
       })

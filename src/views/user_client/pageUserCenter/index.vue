@@ -62,7 +62,7 @@
             </div>
             <div class="base-info-operation">
               <v-btn style="margin-right: 40px;" color="primary" @click="openEditDialog('base')">修改信息</v-btn>
-              <v-btn color="primary" @click="openEditDialog('password')">修改密码</v-btn>
+              <v-btn color="primary" @click="openEditDialog('pwd')">修改密码</v-btn>
             </div>
           </div>
         </v-card>
@@ -70,7 +70,7 @@
           我的比赛
         </v-card>
         <v-card class="user-time-table" v-show="chooseTab === 'userTimeTable'">
-          <time-table :time-table-type="timeTableType"></time-table>
+          <time-table :time-table-type="timeTableType" :free-time-list="userInfo.freeTimeList" @freeTimeListEdit="freeTimeListEdit"></time-table>
         </v-card>
       </div>
       <!-- 修改信息-->
@@ -88,7 +88,7 @@
             <div class="edit-base" v-show="dialogConfig.type === 'base'">
               <v-form ref="editBaseInfoForm" v-model="editBaseInfoValid">
                 <v-text-field
-                  v-model="dialogConfig.editInfo.username"
+                  v-model="dialogConfig.editInfo.baseInfoConfig.username"
                   :rules="usernameRules"
                   label="用户名"
                   :counter="16"
@@ -96,7 +96,7 @@
                   clearable
                 ></v-text-field>
                 <v-text-field
-                  v-model="dialogConfig.editInfo.signature"
+                  v-model="dialogConfig.editInfo.baseInfoConfig.signature"
                   :rules="signatureRules"
                   label="个性签名"
                   :counter="16"
@@ -104,7 +104,7 @@
                   clearable
                 ></v-text-field>
                 <v-text-field
-                  v-model="dialogConfig.editInfo.email"
+                  v-model="dialogConfig.editInfo.baseInfoConfig.email"
                   :rules="emailRules"
                   label="邮箱"
                   required
@@ -112,35 +112,55 @@
                 ></v-text-field>
                 <div class="code" style="display: flex; align-items: center">
                   <v-text-field
-                    v-model="dialogConfig.editInfo.code"
+                    v-model="dialogConfig.editInfo.baseInfoConfig.code"
                     label="验证码"
                     required
                     clearable
                     :disabled="verifyCode.length === 0"
                     style="margin-right: 10px"
                   ></v-text-field>
-                  <v-btn @click="handleVerify" :disabled="verifyProcess || dialogConfig.editInfo.email === userInfo.email  ">{{ verifyProcess ? countDown:'获取验证码' }}</v-btn>
+                  <v-btn @click="handleVerify" :disabled="verifyProcess || dialogConfig.editInfo.baseInfoConfig.email === userInfo.email  ">{{ verifyProcess ? countDown:'获取验证码' }}</v-btn>
                 </div>
               </v-form>
             </div>
-            <div class="edit-password" v-show="dialogConfig.type === 'password'">
+            <div class="edit-password" v-show="dialogConfig.type === 'pwd'">
               <v-form ref="editPasswordForm" v-model="editPasswordValid">
                 <v-text-field
-                  v-model="dialogConfig.editInfo.newPassword"
+                  v-model="dialogConfig.editInfo.passwordConfig.newPassword.value"
                   :rules="passwordRules"
                   label="新的密码"
                   :counter="16"
                   required
                   clearable
-                ></v-text-field>
+                  :type="dialogConfig.editInfo.passwordConfig.newPassword.show ? 'text' : 'password'"
+                >
+                  <template slot="append">
+                    <v-icon
+                      style="cursor: pointer;"
+                      @click="() => dialogConfig.editInfo.passwordConfig.newPassword.show = !dialogConfig.editInfo.passwordConfig.newPassword.show"
+                    >
+                      {{ dialogConfig.editInfo.passwordConfig.newPassword.show ? 'mdi-eye-outline' : 'mdi-eye-off-outline' }}
+                    </v-icon>
+                  </template>
+                </v-text-field>
                 <v-text-field
-                  v-model="dialogConfig.editInfo.confirmPassword"
+                  v-model="dialogConfig.editInfo.passwordConfig.confirmPassword.value"
                   :rules="passwordRules"
                   label="确认密码"
                   required
                   clearable
                   :counter="16"
-                ></v-text-field>
+                  :type="dialogConfig.editInfo.passwordConfig.confirmPassword.show ? 'text' : 'password'"
+                >
+                  <template slot="append">
+                    <v-icon
+                      style="cursor: pointer;"
+                      @click="() => dialogConfig.editInfo.passwordConfig.confirmPassword.show = !dialogConfig.editInfo.passwordConfig.confirmPassword.show"
+                    >
+                      {{ dialogConfig.editInfo.passwordConfig.confirmPassword.show ? 'mdi-eye-outline' : 'mdi-eye-off-outline' }}
+                    </v-icon>
+                  </template>
+                </v-text-field>
               </v-form>
             </div>
           </v-card-text>
@@ -157,7 +177,7 @@
             >修改</v-btn>
             <v-btn
               color="primary"
-              v-show="dialogConfig.type === 'password'"
+              v-show="dialogConfig.type === 'pwd'"
               @click="passwordEdit"
             >修改</v-btn>
           </v-card-actions>
@@ -167,7 +187,7 @@
 </template>
 
 <script>
-import { getCurrentUserInfo, getVerify } from '@/http/user'
+import { getCurrentUserInfo, getVerify, editUserInfo } from '@/http/user'
 import { USER_LEVEL } from '@/constant'
 import { mapMutations } from 'vuex'
 import timeTable from '@/components/timeTable.vue'
@@ -201,7 +221,19 @@ export default {
     timeTableType: 'operation',
     dialogConfig: {
       open: false,
-      editInfo: {},
+      editInfo: {
+        baseInfoConfig: {},
+        passwordConfig: {
+          newPassword: {
+            value: '',
+            show: false
+          },
+          confirmPassword: {
+            value: '',
+            show: false
+          }
+        }
+      },
       type: '',
       event: ''
     },
@@ -249,6 +281,8 @@ export default {
       getCurrentUserInfo().then(res => {
         if (res.success) {
           this.userInfo = res.data
+          this.dialogConfig.editInfo.baseInfoConfig = JSON.parse(JSON.stringify(this.userInfo))
+          this.dialogConfig.editInfo.code = ''
         }
       }).catch(err => {
         console.log(err)
@@ -261,17 +295,14 @@ export default {
       console.log(type)
       this.dialogConfig.open = true
       this.dialogConfig.type = type
-      this.dialogConfig.editInfo = JSON.parse(JSON.stringify(this.userInfo))
-      this.dialogConfig.editInfo.newPassword = ''
-      this.dialogConfig.editInfo.confirmPassword = ''
     },
     handleVerify () {
       // 校验邮箱格式
-      const emailVerify = /.+@.+\..+/.test(this.dialogConfig.editInfo.email)
+      const emailVerify = /.+@.+\..+/.test(this.dialogConfig.editInfo.baseInfoConfig.email)
       if (emailVerify) {
         // 向邮箱发送验证码
         getVerify({
-          email: this.dialogConfig.editInfo.email
+          email: this.dialogConfig.editInfo.baseInfoConfig.email
         }).then(res => {
           if (res.success) {
             this.verifyCode = res.data.verifyCode
@@ -288,7 +319,7 @@ export default {
           this.OPEN_MESSAGE({
             content: res.message,
             type: res.success ? 'success' : 'error',
-            timeout: 2000
+            timeout: 3000
           })
         }).catch(err => {
           console.log(err)
@@ -306,30 +337,35 @@ export default {
       const editBaseInfoForm = this.$refs.editBaseInfoForm.validate()
       if (editBaseInfoForm) {
         // 判断邮箱是否发生修改，如果修改了，需要校验验证码
-        if (this.dialogConfig.editInfo.email !== this.userInfo.email && !this.verifyCode) {
-          this.OPEN_MESSAGE({
-            content: '请校验邮箱',
-            type: 'warning',
-            timeout: 3000
-          })
-          return
+        if (this.dialogConfig.editInfo.baseInfoConfig.email !== this.userInfo.email) {
+          if (!this.verifyCode) {
+            this.OPEN_MESSAGE({
+              content: '请校验邮箱',
+              type: 'warning',
+              timeout: 3000
+            })
+            return
+          }
+          // 校验验证码
+          if (!this.dialogConfig.editInfo.code) {
+            this.OPEN_MESSAGE({
+              content: '请填写验证码',
+              type: 'warning',
+              timeout: 3000
+            })
+            return
+          }
+          if (this.dialogConfig.editInfo.code !== this.verifyCode) {
+            this.OPEN_MESSAGE({
+              content: '验证码错误',
+              type: 'error',
+              timeout: 3000
+            })
+            return
+          }
+          this.confirmEdit('base')
         }
-        // 校验验证码
-        if (!this.dialogConfig.code) {
-          this.OPEN_MESSAGE({
-            content: '请填写验证码',
-            type: 'warning',
-            timeout: 3000
-          })
-        } else if (this.dialogConfig.code !== this.verifyCode) {
-          this.OPEN_MESSAGE({
-            content: '验证码错误',
-            type: 'error',
-            timeout: 3000
-          })
-        } else {
-          console.log('调用接口修改信息')
-        }
+        this.confirmEdit('base')
       } else {
         this.OPEN_MESSAGE({
           content: '请检查你填写的信息',
@@ -339,14 +375,64 @@ export default {
       }
     },
     passwordEdit () {
+      // 调用表单校验方法
+      const editPasswordForm = this.$refs.editPasswordForm.validate()
+      if (editPasswordForm) {
+        // 校验用户填写的两次密码是否一致
+        if (this.dialogConfig.editInfo.passwordConfig.newPassword.value === this.dialogConfig.editInfo.passwordConfig.confirmPassword.value) {
+          this.confirmEdit('pwd')
+        } else {
+          this.OPEN_MESSAGE({
+            content: '两次密码不一致',
+            type: 'error',
+            timeout: 3000
+          })
+        }
+      } else {
+        this.OPEN_MESSAGE({
+          content: '请检查你填写的信息',
+          type: 'error',
+          timeout: 3000
+        })
+      }
+    },
+    freeTimeListEdit (list) {
+      this.confirmEdit('freeTimeList', list)
+    },
+    confirmEdit (type, list) {
+      const editParams = {}
+      editParams.type = type
+      if (type === 'base') {
+        editParams.username = this.dialogConfig.editInfo.baseInfoConfig.username
+        editParams.signature = this.dialogConfig.editInfo.baseInfoConfig.signature
+        editParams.email = this.verifyCode ? this.dialogConfig.editInfo.baseInfoConfig.email : ''
+      } else if (type === 'pwd') {
+        editParams.password = this.dialogConfig.editInfo.passwordConfig.newPassword.value
+      } else {
+        editParams.freeTimeList = list
+      }
+      editUserInfo(editParams).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        this.dialogConfig.open = !res.success
+        if (res.success) {
+          if (type === 'password') this.$refs.editPasswordForm.reset()
+          this.getUserInfo()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     }
   },
   watch: {
     dialogConfig: {
       handler (n, o) {
-        if (n.editInfo.username !== this.userInfo.username ||
-            n.editInfo.signature !== this.userInfo.signature ||
-            n.editInfo.email !== this.userInfo.email) {
+        if (n.editInfo.baseInfoConfig.username !== this.userInfo.username ||
+            n.editInfo.baseInfoConfig.signature !== this.userInfo.signature ||
+            n.editInfo.baseInfoConfig.email !== this.userInfo.email) {
           this.editBaseInfo = true
         } else {
           this.editBaseInfo = false

@@ -193,7 +193,8 @@ router.get('/current', passport.authenticate('jwt', { session: false }), (req, r
       signature: req.user.signature,
       avatar: req.user.avatar,
       role: req.user.role,
-      email: req.user.email
+      email: req.user.email,
+      freeTimeList: req.user.freeTimeList
     },
     message: '查询成功！'
   })
@@ -201,7 +202,7 @@ router.get('/current', passport.authenticate('jwt', { session: false }), (req, r
 
 /**
  * path: api/user/edit
- * des: 修改用户信息接口, 基础信息修改(0) || 绑定邮箱修改(1) || 密码修改(2) || 时间协作数据修改(3)
+ * des: 修改用户信息接口, 基础信息修改和绑定邮箱修改(base) || 密码修改(pwd) || 时间协作数据修改(freeTimeList)
  * return: {
  *   // 状态码
  *   code: '',
@@ -226,34 +227,45 @@ router.put('/edit', passport.authenticate('jwt', { session: false }), (req, res)
     message: ''
   }
   switch (type) {
-    case '0':
-      user.username = req.body.username
-      user.signature = req.body.signature
-      returnInfo.data.username = req.body.username
-      returnInfo.data.signature = req.body.signature
-      break
-    case '1':
-      // 查找用户表中是否存在当前需要绑定的邮箱，单独返回数据
-      // eslint-disable-next-line no-case-declarations
-      const email = req.body.email
-      returnInfo.data.email = req.body.email
-      User.findOne({ email }).then(user => {
-        if (user) {
-          returnInfo.data.code = 400
-          returnInfo.data.success = false
-          returnInfo.data.message = '邮箱已被绑定！'
-          return res.json(returnInfo)
-        }
-        user.email = req.body.email
-        returnInfo.data.message = '修改成功！'
+    case 'base':
+      // 传参存在用户修改邮箱，先判断邮箱是否已被绑定，然后修改用户对应信息
+      if (req.body.email) {
+        // 查找用户表中是否存在当前需要绑定的邮箱，单独返回数据
+        // eslint-disable-next-line no-case-declarations
+        const email = req.body.email
+        returnInfo.data.email = req.body.email
+        User.findOne({ email }).then(user => {
+          if (user) {
+            returnInfo.data.code = 400
+            returnInfo.data.success = false
+            returnInfo.message = '邮箱已被绑定！'
+            return res.json(returnInfo)
+          }
+          user.email = req.body.email
+          user.username = req.body.username
+          user.signature = req.body.signature
+          returnInfo.message = '修改成功！'
+          user.save().then(saveRes => {
+            return res.json(returnInfo)
+          }).catch(saveError => {
+            commonThrow(res, saveError)
+          })
+        })
+      } else {
+        // 用户为修改邮箱，修改基本信息保存即可
+        user.username = req.body.username
+        user.signature = req.body.signature
         user.save().then(saveRes => {
+          returnInfo.message = '修改成功'
+          returnInfo.data.username = req.body.username
+          returnInfo.data.signature = req.body.signature
           return res.json(returnInfo)
         }).catch(saveError => {
           commonThrow(res, saveError)
         })
-      })
+      }
       break
-    case '2':
+    case 'pwd':
       // 校验用户密码是否与原来一致，该过程为异步，所以单独返回数据
       bcrypt.compare(req.body.password, user.password).then((isMatch) => {
         if (isMatch) {
@@ -279,17 +291,18 @@ router.put('/edit', passport.authenticate('jwt', { session: false }), (req, res)
         }
       })
       break
-    case '3':
+    case 'freeTimeList':
       user.freeTimeList = req.body.freeTimeList
+      // 返回修改结果(基础信息，时间协作数据)
+      user.save().then(saveRes => {
+        returnInfo.message = '修改成功'
+        returnInfo.data = req.body.freeTimeList
+        return res.json(returnInfo)
+      }).catch(err => {
+        commonThrow(res, err)
+      })
       break
   }
-  // 统一返回修改结果(基础信息，时间协作数据)
-  user.save().then(saveRes => {
-    returnInfo.message = '修改成功'
-    return res.json(returnInfo)
-  }).catch(err => {
-    commonThrow(res, err)
-  })
 })
 
 /**

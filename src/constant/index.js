@@ -9,18 +9,18 @@ const USER_LEVEL = {
   [USER_PERMISSIONS.ADMIN]: '管理员',
   [USER_PERMISSIONS.SUPER_ADMIN]: '超级管理员'
 }
-// 日期中文
+// 日期
 const DATE = {
-  Monday: '周一',
-  Tuesday: '周二',
-  Wednesday: '周三',
-  Thursday: '周四',
-  Friday: '周五',
-  Saturday: '周六',
-  weekday: '周日'
+  1: '周一',
+  2: '周二',
+  3: '周三',
+  4: '周四',
+  5: '周五',
+  6: '周六',
+  7: '周日'
 }
 // 不显示导航栏的页面
-const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'pageAdmin', 'page401']
+const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'pageAdmin', 'page401', 'pageMatch']
 // 用户信息编辑类型
 const EDIT_TYPE = {
   // 基础信息编辑(用户名||个性签名)

@@ -35,3 +35,17 @@ export const getVerify = (params) => {
     })
   })
 }
+/**
+ * 用户信息修改接口
+ * @param params: {type: ''(必须), email: ''(可选), username: ''(可选), signature: ''(可选), freeTimeList: [](可选)}
+ * @returns {Promise<unknown>}
+ */
+export const editUserInfo = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.put('/user/edit', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
