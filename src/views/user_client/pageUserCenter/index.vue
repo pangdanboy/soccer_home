@@ -34,7 +34,7 @@
         </v-card>
       </div>
       <div class="tab-box">
-        <v-card class="base-info" v-show="chooseTab === 'baseInfo'">
+        <div class="base-info" v-show="chooseTab === 'baseInfo'">
           <div class="base-info-box">
             <div>
               <v-icon>mdi-account</v-icon>
@@ -65,13 +65,31 @@
               <v-btn color="primary" @click="openEditDialog('pwd')">修改密码</v-btn>
             </div>
           </div>
-        </v-card>
-        <v-card class="user-match" v-show="chooseTab === 'userMatch'">
-          我的比赛
-        </v-card>
-        <v-card class="user-time-table" v-show="chooseTab === 'userTimeTable'">
+        </div>
+        <div class="user-match" v-show="chooseTab === 'userMatch'">
+          <v-tabs v-model="userMatchType">
+            <v-tab>我参加的比赛</v-tab>
+            <v-tab>我创建的比赛</v-tab>
+          </v-tabs>
+          <div class="user-match-list">
+            <v-data-table
+              :headers="matchListHeaders"
+              :items="userMatchList"
+              :options.sync="userMatchListOptions"
+              :server-items-length="userMatchTotalCount"
+              :footer-props="{'items-per-page-options':[5, 10]}"
+              class="elevation-1"
+              disable-sort
+            >
+              <template v-slot:item.operate="{ item }">
+                <v-icon @click="checkMatchDetail(item)" style="cursor: pointer;">mdi-soccer</v-icon>
+              </template>
+            </v-data-table>
+          </div>
+        </div>
+        <div class="user-time-table" v-show="chooseTab === 'userTimeTable'">
           <time-table :time-table-type="timeTableType" :free-time-list="userInfo.freeTimeList" @freeTimeListEdit="freeTimeListEdit"></time-table>
-        </v-card>
+        </div>
       </div>
       <!-- 修改信息-->
       <v-dialog
@@ -188,6 +206,7 @@
 
 <script>
 import { getCurrentUserInfo, getVerify, editUserInfo } from '@/http/user'
+import { userJoinMatch } from '@/http/match'
 import { USER_LEVEL } from '@/constant'
 import { mapMutations } from 'vuex'
 import timeTable from '@/components/timeTable.vue'
@@ -218,6 +237,20 @@ export default {
     defaultActive: 0,
     chooseTab: 'baseInfo',
     userInfo: {},
+    // 比赛数据表格的头
+    matchListHeaders: [
+      { text: '比赛名称', value: 'matchName' },
+      { text: '比赛日期', value: 'matchDate' },
+      { text: '比赛时间', value: 'matchClassTime' },
+      { text: '操作', value: 'operate' }
+    ],
+    userMatchListOptions: {},
+    // 用户比赛列表总数
+    userMatchTotalCount: 0,
+    // 用户比赛列表
+    userMatchList: [],
+    // 用户比赛类型(参加or创建)
+    userMatchType: null,
     timeTableType: 'operation',
     dialogConfig: {
       open: false,
@@ -273,7 +306,10 @@ export default {
     }
   },
   mounted () {
+    // 查询用户信息
     this.getUserInfo()
+    // 查询用户参加比赛列表
+    this.getUserJoinMatchList()
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
@@ -287,6 +323,25 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    getUserJoinMatchList () {
+      userJoinMatch({
+        page: this.userMatchListOptions.page,
+        limit: this.userMatchListOptions.itemsPerPage
+      }).then(res => {
+        console.log(res)
+        if (res.success) this.userMatchList = res.data
+        this.userMatchTotalCount = res.count
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    checkMatchDetail (match) {
+      console.log('查看详情')
+      console.log(match)
+      const { _id: matchId } = match
+      // 跳转到比赛详情页，传递matchId
+      this.$router.push('/pageMatchDetail?matchId=' + matchId)
     },
     choose (tab) {
       this.chooseTab = tab
@@ -465,6 +520,7 @@ export default {
       background-image: url('./../../../static/images/user_center.jpg');
       background-size: cover;
       overflow: auto;
+      box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
       .base-info,.user-match{
         width: 100%;
         height: 100%;
@@ -473,6 +529,17 @@ export default {
         align-items: center;
         justify-content: center;
         background-color: rgba(255, 255, 255, 0.5);
+      }
+      .user-match{
+        ::v-deep .v-tabs{
+          width: 100%;
+          height: 8%;
+        }
+        .user-match-list{
+          background-color: #fff;
+          width: 100%;
+          height: 92%;
+        }
       }
       .user-time-table{
         width: 100%;

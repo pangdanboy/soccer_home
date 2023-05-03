@@ -18,8 +18,8 @@
               <v-btn color="primary" v-show="!day.free" @click="setFree(day)">设为空闲</v-btn>
             </v-card-actions>
             <v-card-actions v-show="timeTableType === 'check'">
-              <v-btn color="primary" @click="setBusy(day)" v-show="day.free">查看比赛</v-btn>
-              <v-btn color="primary" @click="setFree(day)" v-show="!day.free" disabled>暂无比赛</v-btn>
+              <v-btn color="primary" @click="checkMatch" v-show="day.haveMatch">查看比赛</v-btn>
+              <v-btn color="primary" v-show="!day.haveMatch" disabled>暂无比赛</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -47,19 +47,19 @@ export default {
     freeTimeList: {
       type: Array,
       required: false,
-      default: () => []
+      default: () => ([])
     },
-    // 比赛时间列表
-    matchTimeList: {
+    // 当前周的比赛列表
+    weekMatchList: {
       type: Array,
       required: false,
-      default: () => []
+      default: () => ([])
     },
     // 当前周的日期
     weekDayDate: {
       type: Array,
       required: false,
-      default: () => []
+      default: () => ([])
     },
     // 当前时间表类型: 用户查看比赛(check)||用户设置时间协作数据
     timeTableType: {
@@ -94,6 +94,9 @@ export default {
     saveFreeTimeList () {
       this.$emit('freeTimeListEdit', this.UserFreeTimeList)
       this.saveBtn = true
+    },
+    // 查看点击时间的比赛
+    checkMatch () {
     }
   },
   watch: {
@@ -116,12 +119,25 @@ export default {
         })
       })
     },
-    matchTimeList: function () {
-      console.log('标记比赛时间')
+    weekMatchList: function () {
+      const haveMatchTimeList = []
+      // 处理比赛列表数据
+      this.weekMatchList.forEach(item => {
+        // 比赛的日期处于当周第几天
+        const weekDay = this.weekDayDate.indexOf(item.matchDate.split('T')[0]) + 1
+        // 拼接日期和时间 类似与: 1-1(星期一第一讲)...
+        const weekDayAndClass = weekDay + '-' + item.matchClassTime
+        item.weekDayAndClass = weekDayAndClass
+        haveMatchTimeList.push(weekDayAndClass)
+      })
+      console.log(haveMatchTimeList)
+      console.log('标记有比赛的时间')
       this.timeData.forEach((weekItem) => {
         weekItem.timeList.forEach((day) => {
-          if (this.matchTimeList.includes(day.id)) {
+          if (haveMatchTimeList.includes(day.id)) {
             day.haveMatch = true
+          } else {
+            day.haveMatch = false
           }
         })
       })

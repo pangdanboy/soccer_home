@@ -19,8 +19,53 @@ const DATE = {
   6: '周六',
   7: '周日'
 }
+// 课程时间参数映射
+const CLASS_TIME = {
+  第一讲: '1',
+  第二讲: '2',
+  第三讲: '3',
+  第四讲: '4',
+  第五讲: '5',
+  第六讲: '6'
+}
+// 课程时间参数
+const CLASS_TIME_MAP = {
+  first: '1',
+  second: '2',
+  third: '3',
+  fourth: '4',
+  fifth: '5',
+  sixth: '6'
+}
+// 课程时间参数与中文映射
+const CLASS_TIME_PARAMS_MAP = {
+  [CLASS_TIME_MAP.first]: {
+    name: '第一讲',
+    time: 'AM 8:00 ~ 9:40'
+  },
+  [CLASS_TIME_MAP.second]: {
+    name: '第二讲',
+    time: 'AM 10:00 ~ 11:40'
+  },
+  [CLASS_TIME_MAP.third]: {
+    name: '第三讲',
+    time: 'PM 14:00 ~ 15:40'
+  },
+  [CLASS_TIME_MAP.fourth]: {
+    name: '第四讲',
+    time: 'PM 16:00 ~ 17:40'
+  },
+  [CLASS_TIME_MAP.fifth]: {
+    name: '第五讲',
+    time: 'PM 19:00 ~ 20:40'
+  },
+  [CLASS_TIME_MAP.sixth]: {
+    name: '第六讲',
+    time: 'PM 20:40 ~ 22:00'
+  }
+}
 // 不显示导航栏的页面
-const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'pageAdmin', 'page401', 'pageMatch']
+const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'pageAdmin', 'page401', 'pageMatch', 'pageMatchDetail']
 // 用户信息编辑类型
 const EDIT_TYPE = {
   // 基础信息编辑(用户名||个性签名)
@@ -38,6 +83,7 @@ const MATCH_TYPE = {
   CLASS_MATCH: '课程比赛',
   LEAGUE_MATCH: '联盟比赛'
 }
+
 // 查询数据时足球比赛类型对应参数
 const MATCH_TYPE_PARAMS = {
   [MATCH_TYPE.FREE_MATCH]: '1',
@@ -52,5 +98,7 @@ export {
   EDIT_TYPE,
   MATCH_TYPE,
   MATCH_TYPE_PARAMS,
-  USER_LEVEL
+  USER_LEVEL,
+  CLASS_TIME,
+  CLASS_TIME_PARAMS_MAP
 }

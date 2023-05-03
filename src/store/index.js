@@ -12,7 +12,9 @@ export default new Vuex.Store({
       // 角色
       role: '0',
       // 头像
-      avatar: ''
+      avatar: '',
+      // id
+      id: ''
     },
     // 全局提示信息
     message: {
@@ -24,6 +26,14 @@ export default new Vuex.Store({
       content: '',
       // 延迟消失时间
       timeout: 2000
+    },
+    // 全局二次确认弹框
+    dialogConfig: {
+      status: false,
+      title: '',
+      content: '',
+      // 用户操作，确认or取消
+      userOperate: false
     }
   },
   getters: {
@@ -68,6 +78,7 @@ export default new Vuex.Store({
     SET_USER_INFO: (state, payload) => {
       state.UserInfo.role = payload.role
       state.UserInfo.avatar = payload.avatar
+      state.UserInfo.id = payload.id
     }
   },
   actions: {

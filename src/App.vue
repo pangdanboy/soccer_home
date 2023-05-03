@@ -32,7 +32,7 @@
               <span>后台管理</span>
             </v-tooltip>
           </router-link>
-          <router-link to="/pageMatch" tag="span" v-show="USER_ROLE !== USER_PERMISSIONS.COMMON_USER">
+          <router-link to="/pageMatch" tag="span" v-show="USER_LOGIN_STATUS">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon v-bind="attrs" v-on="on">
@@ -177,7 +177,8 @@ export default {
           console.log(res)
           this.SET_USER_INFO({
             role: res.data.role,
-            avatar: res.data.avatar
+            avatar: res.data.avatar,
+            id: res.data.id
           })
         }).catch(err => {
           console.log(err)

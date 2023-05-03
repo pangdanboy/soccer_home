@@ -25,7 +25,7 @@ const { User } = require('../../utlis/db/mongoose/models/user')
  */
 router.post('/register', (req, res) => {
   const userEmail = req.body.email
-  const userAvatarUrl = userAvatar[random(0, 1)]
+  const userAvatarUrl = userAvatar[random(0, 7)]
   // 判断用户输入邮箱是否已经注册
   User.findOne({ email: userEmail }).then(user => {
     if (user) {
@@ -343,6 +343,24 @@ router.get('/getUserById', (req, res) => {
   })
 })
 
+/**
+ * 根据用户输入查询用户信息，返回id和username
+ */
+router.get('/getUserByInput', (req, res) => {
+  const userInput = req.query.userInput
+  console.log(req.query)
+  User.find({ username: { $regex: userInput } }, { _id: 1, username: 1 }).then(user => {
+    res.json({
+      code: 200,
+      success: true,
+      data: user,
+      message: '查询成功！'
+    })
+  }).catch(err => {
+    console.log(err)
+    commonThrow(res, err)
+  })
+})
 /**
  * 用户api，用于用户的登录注册和信息修改
  * @type {Router}

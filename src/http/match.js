@@ -1,0 +1,61 @@
+import axios from './../plugins/axios'
+
+export const createMatch = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/match/create', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const queryMatch = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/match/queryMatch', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const getMatchById = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.get('/match/getMatchById', { params }).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const joinMatch = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/match/joinMatch', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const quitMatch = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/match/quitMatch', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const userJoinMatch = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/match/userJoinMatch', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}

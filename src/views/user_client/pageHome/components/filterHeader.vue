@@ -11,7 +11,7 @@
               prepend-icon="mdi-magnify"
               v-model="item.value"
               clearable
-              @keydown.enter="() => $emit('getDataList')"
+              @keydown.enter="() => $emit('getDataList', 1)"
             ></v-text-field>
           </v-col>
           <v-col :key="item.key" class="filter-date" v-if="item.type === 'dateRange'" cols="3">
@@ -33,9 +33,11 @@
                   readonly
                   v-bind="attrs"
                   v-on="on"
+                  @change="() => $emit('getDataList', 1)"
+                  clearable
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="item.value" no-title scrollable range>
+              <v-date-picker v-model="item.value" no-title scrollable range locale="zh-cn">
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" @click="queryDataList">
                   确定
@@ -50,7 +52,7 @@
               :label="item.label"
               outlined dense
               prepend-icon="mdi-format-list-bulleted-type"
-              clearable @change="() => $emit('getDataList')"
+              clearable @change="() => $emit('getDataList', 1)"
             ></v-select>
           </v-col>
           <v-col :key="item.key" class="filter-operation" v-if="item.type === 'button'" :cols="filterConfig.all ? 2:8">
@@ -91,7 +93,7 @@ export default {
     },
     queryDataList () {
       this.menu = false
-      this.$emit('getDataList')
+      this.$emit('getDataList', 1)
     }
   }
 }

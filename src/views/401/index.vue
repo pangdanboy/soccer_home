@@ -5,10 +5,10 @@
         <v-icon size="66" color="#1976d2" class="logo">mdi-soccer</v-icon>
       </div>
       <div class="tip-title">
-        <h2>无法访问此页面</h2>
+        <h2>无法访问此页面或者进行此操作</h2>
       </div>
       <div class="tip-reason">
-        <p v-if="type === 'NoLogin'">你可能没有登录或者没有访问该页面的权限</p>
+        <p v-if="type === 'NoLogin'">你可能没有登录或者没有访问该页面的权限或者进行此操作的权限</p>
         <p v-else>你没有访问该页面的权限</p>
       </div>
       <div class="tip-method">

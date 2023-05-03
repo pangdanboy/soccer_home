@@ -58,9 +58,14 @@ const routes = [
     }
   },
   {
+    path: '/pageMatchDetail',
+    name: 'pageMatchDetail',
+    component: () => import('../views/user_client/pageMatch/matchDetail')
+  },
+  {
     path: '/pageMatch',
     name: 'pageMatch',
-    component: () => import('../views/user_client/pageMatch/index'),
+    component: () => import('../views/user_client/pageMatch/createMatch'),
     meta: {
       isAuth: true
     }

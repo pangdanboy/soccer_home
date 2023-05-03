@@ -27,8 +27,10 @@ require('./config/passport')(passport)
 
 // 引入路由
 const user = require('./routes/api/user')
+const match = require('./routes/api/match')
 // 使用路由
 app.use('/api/user', user)
+app.use('/api/match', match)
 
 // 开启请求监听
 app.listen(serverInfo.port, () => {

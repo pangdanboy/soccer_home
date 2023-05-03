@@ -15,17 +15,23 @@
       <div class="match-list">
         <!-- 所有比赛列表，分页显示 -->
         <div class="all-match-list" v-show="showAllMatchList">
-          <match-item></match-item>
-          <match-item></match-item>
-          <match-item></match-item>
-          <match-item></match-item>
+          <template v-for="(item, index) in matchList">
+            <match-item :key="item._id" :match-data="item" :class="{'no-margin': (index + 1) % 3 === 0}"></match-item>
+          </template>
+        </div>
+        <div class="page text-center" v-show="showAllMatchList">
+          <v-pagination
+            v-model="page"
+            @input="pageChange"
+            :length="Math.ceil(totalCount/limit)"
+          ></v-pagination>
         </div>
         <!-- 按一周展示比赛列表，可切换周 -->
         <div class="week-match-list" v-show="!showAllMatchList">
           <time-table
             :free-time-list="freeTimeList"
             :week-day-date="weekDayDate"
-            :match-time-list="matchTimeList"
+            :week-match-list="weekMatchList"
             :time-table-type="timeTableType"
           ></time-table>
         </div>
@@ -41,6 +47,8 @@ import { MATCH_TYPE, MATCH_TYPE_PARAMS } from '@/constant'
 import filterHeader from './components/filterHeader.vue'
 import matchItem from '@/views/user_client/pageHome/components/matchItem.vue'
 import moment from 'moment'
+import { queryMatch } from '@/http/match'
+import { mapMutations } from 'vuex'
 
 export default {
   name: 'pageHome',
@@ -52,10 +60,12 @@ export default {
   data: () => ({
     // 用户每周空闲时间列表
     freeTimeList: ['1-1', '4-3', '7-1'],
-    // 当前周比赛时间列表
-    matchTimeList: ['1-1', '4-3'],
+    // 按周查看比赛列表数据
+    weekMatchList: [],
     // 当前时间所处周日期，可切换为未来时间的周
     weekDayDate: [],
+    // 比赛列表数据
+    matchList: [],
     // 时间表类型
     timeTableType: 'check',
     // 是否显示所有比赛列表
@@ -166,48 +176,70 @@ export default {
           ]
         }
       ]
-    }
+    },
+    // 比赛列表分页相关
+    page: 1,
+    limit: 9,
+    totalCount: 0
   }),
   mounted () {
     // 获取当前日期所处周
     this.weekDayDate = getWeekDays(new Date())
-    // 初始化过滤条件中日期范围为当周初末
-    this.filterConfig.filterList.forEach((item) => {
-      if (item.type === 'dateRange') {
-        item.value.push(this.weekDayDate[0])
-        item.value.push(this.weekDayDate[this.weekDayDate.length - 1])
-      }
-    })
     this.getDataList()
   },
   computed: {
   },
   methods: {
+    ...mapMutations(['OPEN_MESSAGE']),
     // 按周查看比赛
     toggleWeekShow () {
       this.showAllMatchList = false
       this.filterConfig.filterList = this.showWeekFilterList
       this.filterConfig.all = false
+      this.getDataList('not')
     },
     // 查看全部比赛
     toggleAllShow () {
       this.showAllMatchList = true
       this.filterConfig.filterList = this.showAllFilterList
       this.filterConfig.all = true
+      this.getDataList(1)
     },
     // 获取比赛列表
-    getDataList () {
+    getDataList (page) {
       const query = {}
+      // 这里重置页码是因为，当筛选条件发生变化之后，分页查询应该从第一页开始
+      if (page && page !== 'not') this.page = page
+      // 按周查看时不需要分页
+      if (page !== 'not') {
+        // 添加分页相关参数
+        query.page = this.page
+        query.limit = this.limit
+      }
       this.filterConfig.filterList.forEach((item) => {
         if (item.type !== 'button') query[item.key] = item.value
       })
-      // 处理比赛时间类型和比赛类型参数
+      // 处理比赛类型参数
       if (query.matchType) query.matchType = MATCH_TYPE_PARAMS[query.matchType]
       // 如果当前是按周查看，添加日期范围参数
       if (!this.showAllMatchList) query.matchDate = [this.weekDayDate[0], this.weekDayDate[this.weekDayDate.length - 1]]
-      console.log(query)
+      queryMatch(query).then(res => {
+        console.log(res)
+        if (!res.success) {
+          this.OPEN_MESSAGE({
+            content: res.message,
+            type: 'error',
+            timeout: 3000
+          })
+        } else {
+          this.matchList = res.data
+          this.totalCount = res.count
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     },
-    // 获取下一周的比赛数据
+    // 获取上或下一周的比赛数据
     changeWeekData (type) {
       console.log(type)
       if (type === 'last') {
@@ -219,10 +251,21 @@ export default {
         this.weekDayDate = getWeekDays(moment(this.weekDayDate[0]).add(7, 'days'))
         console.log(this.weekDayDate)
       }
+      // 按周查看时不需要分页查询参数
+      this.getDataList('not')
+    },
+    // 页数变化
+    pageChange () {
       this.getDataList()
     }
   },
   watch: {
+    matchList: function (newVal) {
+      // 如果当前是按周查看比赛列表数据，处理
+      if (!this.showAllMatchList) {
+        this.weekMatchList = newVal
+      }
+    }
   }
 }
 </script>
@@ -237,12 +280,25 @@ export default {
       display: flex;
       flex-direction: column;
       .match-list{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         .all-match-list{
+          width: 100%;
           padding: 10px;
           display: flex;
-          justify-content: space-between;
+          justify-content: flex-start;
           flex-wrap: wrap;
+          .no-margin{
+            margin-right: 0;
+          }
         }
+      }
+      .page{
+        width: 32%;
+      }
+      .week-match-list{
+        width: 100%;
       }
     }
   }

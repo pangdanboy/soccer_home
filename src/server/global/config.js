@@ -11,7 +11,16 @@ const serverInfo = {
   port: process.env.PORT || 5000
 }
 // 用户头像
-const userAvatar = ['/public/userAvatar/user_avatar_c.png', '/public/userAvatar/user_avatar_mx.png']
+const userAvatar = [
+  '/public/userAvatar/user_avatar_c.png',
+  '/public/userAvatar/user_avatar_mx.png',
+  '/public/userAvatar/user_avatar_amf.png',
+  '/public/userAvatar/user_avatar_cb.png',
+  '/public/userAvatar/user_avatar_cmf.png',
+  '/public/userAvatar/user_avatar_gk.png',
+  '/public/userAvatar/user_avatar_lw.png',
+  '/public/userAvatar/user_avatar_nme.png'
+]
 // 用户角色定义
 const USER_PERMISSIONS = {
   SUPER_ADMIN: '2',

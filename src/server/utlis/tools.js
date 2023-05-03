@@ -102,7 +102,18 @@ function random (Min, Max) {
   return num
 }
 
+/**
+ * 校验用户角色
+ * @param userRole 用户角色
+ * @param targetRole 目标角色
+ * @return {boolean}
+ */
+function verifyUserRole (userRole, targetRole) {
+  return userRole === targetRole
+}
+
 module.exports = {
   sendEmail,
-  random
+  random,
+  verifyUserRole
 }

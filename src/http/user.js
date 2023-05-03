@@ -49,3 +49,17 @@ export const editUserInfo = (params) => {
     })
   })
 }
+/**
+ * 用户输入搜索用户
+ * @param params
+ * @return {Promise<unknown>}
+ */
+export const getUserByInput = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.get('/user/getUserByInput', { params }).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
