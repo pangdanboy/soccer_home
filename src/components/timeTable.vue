@@ -18,7 +18,7 @@
               <v-btn color="primary" v-show="!day.free" @click="setFree(day)">设为空闲</v-btn>
             </v-card-actions>
             <v-card-actions v-show="timeTableType === 'check'">
-              <v-btn color="primary" @click="checkMatch" v-show="day.haveMatch">查看比赛</v-btn>
+              <v-btn color="primary" @click="checkMatch(weekItem.date, day.id)" v-show="day.haveMatch">查看比赛</v-btn>
               <v-btn color="primary" v-show="!day.haveMatch" disabled>暂无比赛</v-btn>
             </v-card-actions>
           </v-card>
@@ -95,8 +95,9 @@ export default {
       this.$emit('freeTimeListEdit', this.UserFreeTimeList)
       this.saveBtn = true
     },
-    // 查看点击时间的比赛
-    checkMatch () {
+    // 查看点击该天该讲的比赛
+    checkMatch (date, classTime) {
+      this.$emit('openWeekMatchList', date, classTime)
     }
   },
   watch: {

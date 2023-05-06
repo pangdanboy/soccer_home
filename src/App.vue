@@ -22,7 +22,7 @@
               <span>消息中心</span>
             </v-tooltip>
           </router-link>
-          <router-link to="/pageAdmin" tag="span" v-show="USER_ROLE === USER_PERMISSIONS.SUPER_ADMIN">
+          <router-link to="/pageAdmin/overview" tag="span" v-show="USER_ROLE === USER_PERMISSIONS.SUPER_ADMIN">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon v-bind="attrs" v-on="on">

@@ -80,9 +80,41 @@
               :footer-props="{'items-per-page-options':[5, 10]}"
               class="elevation-1"
               disable-sort
+              style="box-shadow: none !important;"
             >
               <template v-slot:item.operate="{ item }">
-                <v-icon @click="checkMatchDetail(item)" style="cursor: pointer;">mdi-soccer</v-icon>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-icon
+                      @click="checkMatchDetail(item)"
+                      style="cursor: pointer; margin-right: 10px;"
+                      v-bind="attrs" v-on="on"
+                    >mdi-text-search-variant</v-icon>
+                  </template>
+                  <span>查看详情</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-icon
+                      v-show="userMatchType === 1"
+                      @click="openDeleteDialog(item)"
+                      style="cursor: pointer; margin-right: 10px;"
+                      v-bind="attrs" v-on="on"
+                    >mdi-trash-can-outline</v-icon>
+                  </template>
+                  <span>删除比赛</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-icon
+                      v-show="userMatchType === 1"
+                      @click="editMatch(item)"
+                      style="cursor: pointer;"
+                      v-bind="attrs" v-on="on"
+                    >mdi-square-edit-outline</v-icon>
+                  </template>
+                  <span>编辑比赛</span>
+                </v-tooltip>
               </template>
             </v-data-table>
           </div>
@@ -201,20 +233,24 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <!-- 删除比赛二次确认弹框 -->
+      <common-dialog :dialog-config="deleteDialogConfig" @close="closeDeleteDialog" @delete="deleteMatch"></common-dialog>
     </div>
 </template>
 
 <script>
 import { getCurrentUserInfo, getVerify, editUserInfo } from '@/http/user'
-import { userJoinMatch } from '@/http/match'
-import { USER_LEVEL } from '@/constant'
+import { userJoinMatch, userCreateMatch, deleteMatch } from '@/http/match'
+import { USER_LEVEL, CLASS_TIME_PARAMS_MAP, MATCH_TYPE_PARAMS_MAP } from '@/constant'
 import { mapMutations } from 'vuex'
 import timeTable from '@/components/timeTable.vue'
+import commonDialog from '@/components/commonDialog.vue'
 
 export default {
   name: 'pageUserCenter',
   components: {
-    timeTable
+    timeTable,
+    commonDialog
   },
   data: () => ({
     userCenterTabs: [
@@ -240,11 +276,14 @@ export default {
     // 比赛数据表格的头
     matchListHeaders: [
       { text: '比赛名称', value: 'matchName' },
+      { text: '比赛类型', value: 'matchType' },
       { text: '比赛日期', value: 'matchDate' },
       { text: '比赛时间', value: 'matchClassTime' },
       { text: '操作', value: 'operate' }
     ],
-    userMatchListOptions: {},
+    userMatchListOptions: {
+      userMatchType: ''
+    },
     // 用户比赛列表总数
     userMatchTotalCount: 0,
     // 用户比赛列表
@@ -252,6 +291,7 @@ export default {
     // 用户比赛类型(参加or创建)
     userMatchType: null,
     timeTableType: 'operation',
+    // 信息修改弹框配置
     dialogConfig: {
       open: false,
       editInfo: {
@@ -269,6 +309,19 @@ export default {
       },
       type: '',
       event: ''
+    },
+    // 删除比赛二次确认弹框配置
+    deleteDialogConfig: {
+      // 弹框打开与否
+      status: false,
+      // 弹框标题
+      title: '删除比赛',
+      // 弹框内容
+      content: '你确定删除该比赛吗？比赛删除后不可恢复，请再次确认你的操作！',
+      // 弹框确认触发事件
+      event: 'delete',
+      // 待删除的比赛id
+      deleteMatchId: ''
     },
     // 修改基本信息表单校验标志
     editBaseInfoValid: false,
@@ -332,9 +385,60 @@ export default {
         console.log(res)
         if (res.success) this.userMatchList = res.data
         this.userMatchTotalCount = res.count
+        // 处理数据，处理数据中比赛的日期和时间
+        this.handlerMatchData()
       }).catch(err => {
         console.log(err)
       })
+    },
+    getUserCreateMatchList () {
+      userCreateMatch({
+        page: this.userMatchListOptions.page,
+        limit: this.userMatchListOptions.itemsPerPage
+      }).then(res => {
+        console.log(res)
+        if (res.success) this.userMatchList = res.data
+        this.userMatchTotalCount = res.count
+        // 处理数据，处理数据中比赛的日期和时间
+        this.handlerMatchData()
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    handlerMatchData () {
+      this.userMatchList.forEach(item => {
+        item.matchDate = item.matchDate.split('T')[0]
+        item.matchType = MATCH_TYPE_PARAMS_MAP[item.matchType]
+        item.matchClassTime = CLASS_TIME_PARAMS_MAP[item.matchClassTime].name + '--' + CLASS_TIME_PARAMS_MAP[item.matchClassTime].time
+      })
+    },
+    openDeleteDialog (match) {
+      this.deleteDialogConfig.status = true
+      this.deleteDialogConfig.deleteMatchId = match._id
+    },
+    closeDeleteDialog () {
+      this.deleteDialogConfig.status = false
+    },
+    deleteMatch () {
+      this.closeDeleteDialog()
+      console.log('删除比赛：', this.deleteDialogConfig.deleteMatchId)
+      deleteMatch({ matchId: this.deleteDialogConfig.deleteMatchId }).then(res => {
+        console.log(res)
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        // 重新加载用户创建比赛列表
+        this.getUserCreateMatchList()
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    editMatch (match) {
+      console.log('编辑比赛', match)
+      // 跳转到比赛编辑页
+      this.$router.push('/pageMatch?matchId=' + match._id)
     },
     checkMatchDetail (match) {
       console.log('查看详情')
@@ -492,6 +596,20 @@ export default {
         } else {
           this.editBaseInfo = false
         }
+      },
+      deep: true
+    },
+    // 切换查看比赛类型，重置分页和每页条数
+    userMatchType: function (newVal) {
+      // 使userMatchListOptions发生变化触发查询
+      this.userMatchListOptions.userMatchType = newVal
+      this.userMatchListOptions.page = 1
+      this.userMatchListOptions.itemsPerPage = 5
+    },
+    userMatchListOptions: {
+      handler () {
+        if (this.userMatchType === 0) this.getUserJoinMatchList()
+        if (this.userMatchType === 1) this.getUserCreateMatchList()
       },
       deep: true
     }

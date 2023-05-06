@@ -1,3 +1,5 @@
+const { Match } = require('./db/mongoose/models/match')
+
 // 发送邮件的node插件
 const nodemailer = require('nodemailer')
 /**
@@ -112,8 +114,18 @@ function verifyUserRole (userRole, targetRole) {
   return userRole === targetRole
 }
 
+/**
+ * 向用户发送系统通知
+ * @param matchChange 比赛变化: {matchId: '', change: ''}
+ * @param users 接收通知的用户id数组
+ * @param type 通知类型：比赛信息变更(change)、比赛删除(delete)
+ */
+function sendSystemNoticeToUser (matchChange, users, type) {
+}
+
 module.exports = {
   sendEmail,
   random,
-  verifyUserRole
+  verifyUserRole,
+  sendSystemNoticeToUser
 }

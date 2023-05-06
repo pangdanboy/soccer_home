@@ -63,3 +63,18 @@ export const getUserByInput = (params) => {
     })
   })
 }
+
+/**
+ * 批量查询用户信息
+ * @param params
+ * @returns {Promise<unknown>}
+ */
+export const getUserByIds = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.get('/user/getUserByIds', { params }).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}

@@ -1,10 +1,13 @@
 <template>
-  <div id="admin"></div>
+  <div id="admin">
+    后台管理
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'pageAdmin'
+  // eslint-disable-next-line vue/multi-word-component-names
+  name: 'overview'
 }
 </script>
 

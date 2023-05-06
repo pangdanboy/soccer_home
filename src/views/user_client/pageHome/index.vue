@@ -33,21 +33,24 @@
             :week-day-date="weekDayDate"
             :week-match-list="weekMatchList"
             :time-table-type="timeTableType"
+            @openWeekMatchList="openWeekMatchList"
           ></time-table>
         </div>
       </div>
     </div>
+    <week-match-list :week-match-list-config="weekMatchListConfig" @close="closeWeekDayDialog" @pageChange="weekDayMatchListPageChange"></week-match-list>
   </div>
 </template>
 
 <script>
 import timeTable from '@/components/timeTable.vue'
 import { getWeekDays } from '@/utils'
-import { MATCH_TYPE, MATCH_TYPE_PARAMS } from '@/constant'
+import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME_PARAMS_MAP } from '@/constant'
 import filterHeader from './components/filterHeader.vue'
 import matchItem from '@/views/user_client/pageHome/components/matchItem.vue'
+import weekMatchList from '@/views/user_client/pageHome/components/weekMatchList.vue'
 import moment from 'moment'
-import { queryMatch } from '@/http/match'
+import { queryMatch, getMatchByDateAndTime } from '@/http/match'
 import { mapMutations } from 'vuex'
 
 export default {
@@ -55,7 +58,8 @@ export default {
   components: {
     timeTable,
     filterHeader,
-    matchItem
+    matchItem,
+    weekMatchList
   },
   data: () => ({
     // 用户每周空闲时间列表
@@ -180,7 +184,20 @@ export default {
     // 比赛列表分页相关
     page: 1,
     limit: 9,
-    totalCount: 0
+    totalCount: 0,
+    // 查看指定日期指定讲的比赛弹框配置
+    weekMatchListConfig: {
+      status: false,
+      title: '比赛列表',
+      time: '',
+      matchList: [],
+      date: '',
+      classTime: '',
+      // 分页相关
+      page: 1,
+      limit: 5,
+      totalCount: 0
+    }
   }),
   mounted () {
     // 获取当前日期所处周
@@ -257,6 +274,38 @@ export default {
     // 页数变化
     pageChange () {
       this.getDataList()
+    },
+    // 按周查看时点击存在比赛的天，查询该天的比赛列表
+    openWeekMatchList (date, classTime) {
+      console.log('查询该天该讲比赛列表', date, classTime)
+      this.weekMatchListConfig.status = true
+      this.weekMatchListConfig.date = date
+      this.weekMatchListConfig.classTime = classTime
+      this.weekMatchListConfig.time = date + '-' + CLASS_TIME_PARAMS_MAP[classTime.split('-')[1]].name + '-' + CLASS_TIME_PARAMS_MAP[classTime.split('-')[1]].time
+      // 查询该天该讲比赛列表
+      this.getWeekDayMatchList()
+    },
+    getWeekDayMatchList () {
+      // 查询该天该讲比赛列表
+      getMatchByDateAndTime({
+        matchDate: this.weekMatchListConfig.date,
+        time: this.weekMatchListConfig.classTime.split('-')[1],
+        page: this.weekMatchListConfig.page,
+        limit: this.weekMatchListConfig.limit
+      }).then(res => {
+        this.weekMatchListConfig.matchList = res.data
+        this.weekMatchListConfig.totalCount = res.count
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    // 改天该讲比赛列表分页发生变化时，重新查询比赛列表
+    weekDayMatchListPageChange (page) {
+      this.weekMatchListConfig.page = page
+      this.getWeekDayMatchList()
+    },
+    closeWeekDayDialog () {
+      this.weekMatchListConfig.status = false
     }
   },
   watch: {

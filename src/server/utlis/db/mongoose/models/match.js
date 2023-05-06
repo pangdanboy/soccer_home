@@ -46,6 +46,11 @@ const match = {
     type: Date,
     required: true,
     default: Date.now()
+  },
+  // 更新时间
+  updateTime: {
+    type: Date,
+    required: true
   }
 }
 const matchSchema = new mongoose.Schema(match, { minimize: false })

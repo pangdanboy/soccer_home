@@ -13,7 +13,7 @@
                 outlined dense
                 required
                 clearable
-                prepend-icon="mdi-calendar"
+                prepend-icon="mdi-application-edit-outline"
               ></v-text-field>
             </div>
             <div class="match-date">
@@ -54,7 +54,7 @@
                 :items="matchTimeSelectList"
                 outlined dense
                 clearable
-                prepend-icon="mdi-format-list-bulleted-type"
+                prepend-icon="mdi-book-open-blank-variant"
               ></v-select>
             </div>
             <div class="match-area">
@@ -65,11 +65,13 @@
                 label="比赛场地"
                 outlined dense
                 clearable
-                prepend-icon="mdi-format-list-bulleted-type"
+                prepend-icon="mdi-soccer-field"
               ></v-select>
             </div>
             <div class="match-type">
-              <p style="font-size: 16px; font-weight: bolder;">比赛类型</p>
+              <p style="font-size: 16px; font-weight: bolder;">
+                比赛类型
+              </p>
               <v-radio-group v-model="editMatchData.matchType" row>
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -140,17 +142,28 @@
         </v-form>
       </template>
       <template #operate>
-        <v-btn color="primary" style="width: 80px; height: 40px;" @click="createMatch">发布</v-btn>
+        <v-btn
+          color="primary"
+          style="width: 80px; height: 40px;"
+          @click="createOrEditMatch"
+          v-show="formStatus === 'create'"
+        >发布</v-btn>
+        <v-btn
+          color="primary"
+          style="width: 80px; height: 40px;"
+          @click="createOrEditMatch"
+          v-show="formStatus === 'edit'"
+        >修改并发布</v-btn>
       </template>
     </detail>
   </div>
 </template>
 
 <script>
-import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME } from '@/constant'
+import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME, CLASS_TIME_PARAMS_MAP } from '@/constant'
 import { mapMutations } from 'vuex'
-import { createMatch } from '@/http/match'
-import { getUserByInput } from '@/http/user'
+import { createMatch, editMatch, getMatchById } from '@/http/match'
+import { getUserByIds, getUserByInput } from '@/http/user'
 import detail from '@/components/detail'
 
 export default {
@@ -166,6 +179,8 @@ export default {
       title: '创建比赛',
       subTitle: '来一场酣畅淋漓的足球比赛吧！'
     },
+    // 表单状态，新建(create)或者编辑(edit)
+    formStatus: 'create',
     // 待编辑比赛信息，用户新建或者修改比赛信息时使用
     editMatchData: {
       // 比赛名称
@@ -215,10 +230,15 @@ export default {
   }),
   mounted () {
     console.log(this.$route)
+    if (this.$route.query.matchId) {
+      this.formStatus = 'edit'
+      this.detailConfig.title = '编辑比赛'
+      this.getMatchData()
+    }
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
-    createMatch () {
+    createOrEditMatch () {
       // 表单校验
       if (!this.$refs.matchForm.validate()) return
       if (this.editMatchData.matchType === MATCH_TYPE_PARAMS[MATCH_TYPE.LEAGUE_MATCH]) {
@@ -244,18 +264,33 @@ export default {
       newMatchData.matchClassTime = CLASS_TIME[this.editMatchData.matchClassTime]
       newMatchData.matchDate = new Date(this.editMatchData.matchDate)
       newMatchData.userId = this.$store.state.UserInfo.id
-      // // 创建比赛
-      createMatch(newMatchData).then(res => {
-        console.log(res)
-        this.OPEN_MESSAGE({
-          content: res.message,
-          type: res.success ? 'success' : 'error',
-          timeout: 3000
+      if (this.formStatus === 'create') {
+        // 创建比赛
+        createMatch(newMatchData).then(res => {
+          console.log(res)
+          this.OPEN_MESSAGE({
+            content: res.message,
+            type: res.success ? 'success' : 'error',
+            timeout: 3000
+          })
+          if (res.success) this.$router.push('/pageHome')
+        }).catch(err => {
+          console.log(err)
         })
-        if (res.success) this.$router.push('/pageHome')
-      }).catch(err => {
-        console.log(err)
-      })
+      } else {
+        // 添加matchId
+        newMatchData.matchId = this.$route.query.matchId
+        // 编辑比赛
+        editMatch(newMatchData).then(res => {
+          console.log(res)
+          this.OPEN_MESSAGE({
+            content: res.message,
+            type: res.success ? 'success' : 'error',
+            timeout: 3000
+          })
+          if (res.success) this.$router.push('/pageHome')
+        })
+      }
     },
     // 搜索用户
     searchGamers (value) {
@@ -270,6 +305,39 @@ export default {
           console.log(err)
         })
       }, 1000)
+    },
+    // 查询比赛信息
+    getMatchData () {
+      const { matchId } = this.$route.query
+      // 查询赛事信息
+      getMatchById({ matchId: matchId }).then(res => {
+        if (res.success) {
+          console.log(res)
+          // 初始化表单编辑比赛信息
+          this.editMatchData.matchName = res.data.matchName
+          this.editMatchData.matchDate = res.data.matchDate.split('T')[0]
+          this.editMatchData.matchClassTime = CLASS_TIME_PARAMS_MAP[res.data.matchClassTime].name
+          this.editMatchData.matchArea = res.data.matchArea
+          this.editMatchData.matchType = res.data.matchType
+          this.editMatchData.matchGamerList = res.data.matchGamerList
+          this.editMatchData.matchDescription = res.data.matchDescription
+          if (res.data.matchGamerList.length === 0) return
+          // 查询所有参赛者信息，初始化下拉框数据
+          getUserByIds({ userIds: this.editMatchData.matchGamerList }).then(userInfoList => {
+            this.searchGamerList = userInfoList.data
+          }).catch(err => {
+            console.log(err)
+          })
+        } else {
+          this.OPEN_MESSAGE({
+            content: res.message,
+            type: 'error',
+            timeout: 3000
+          })
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     }
   }
 }

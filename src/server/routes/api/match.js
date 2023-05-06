@@ -23,13 +23,43 @@ router.post('/create', passport.authenticate('jwt', { session: false }), (req, r
     matchArea: req.body.matchArea,
     matchType: req.body.matchType,
     matchDescription: req.body.matchDescription,
-    matchGamerList: req.body.matchGamerList
+    matchGamerList: req.body.matchGamerList,
+    updateTime: Date.now()
   })
   newMatch.save().then(match => {
     return res.json({
       code: 200,
       data: match,
       message: '创建成功！',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 比赛编辑
+ */
+router.post('/editMatch', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const editMatchId = req.body.matchId
+  const editUserId = req.user._id.toString()
+  const updateColumn = {
+    matchName: req.body.matchName,
+    matchDate: req.body.matchDate,
+    matchClassTime: req.body.matchClassTime,
+    matchArea: req.body.matchArea,
+    matchType: req.body.matchType,
+    matchDescription: req.body.matchDescription,
+    matchGamerList: req.body.matchGamerList,
+    updateTime: Date.now()
+  }
+  // 匹配编辑用户是否为编辑的比赛的创建者，如果是才更新该比赛信息
+  Match.updateOne({ $and: [{ _id: editMatchId }, { createMatchUserId: editUserId }] }, updateColumn).then(match => {
+    return res.json({
+      code: 200,
+      data: {},
+      message: '更新成功！',
       success: true
     })
   }).catch(err => {
@@ -145,6 +175,52 @@ router.post('/userJoinMatch', passport.authenticate('jwt', { session: false }), 
 })
 
 /**
+ * 查询用户创建的比赛列表
+ */
+router.post('/userCreateMatch', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const createUserId = req.user._id.toString()
+  const options = {
+    page: req.body.page,
+    limit: req.body.limit,
+    sort: { _id: -1 },
+    lean: true
+  }
+  const query = {
+    createMatchUserId: createUserId
+  }
+  Match.paginate(query, options).then(matchList => {
+    return res.json({
+      code: 200,
+      count: matchList.totalDocs,
+      data: matchList.docs,
+      message: '查询成功',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 删除比赛
+ */
+router.post('/deleteMatch', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const deleteMatchId = req.body.matchId
+  const userId = req.user._id.toString()
+  // 匹配删除用户是否为删除比赛的创建者，如果是才删除该比赛
+  Match.deleteOne({ $and: [{ _id: deleteMatchId }, { createMatchUserId: userId }] }).then(deleteRes => {
+    return res.json({
+      code: 200,
+      data: {},
+      message: '删除成功！',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
  * 根据id查询比赛信息
  */
 router.get('/getMatchById', (req, res) => {
@@ -160,6 +236,36 @@ router.get('/getMatchById', (req, res) => {
     commonThrow(res, err)
   })
 })
+
+/**
+ * 根据比赛日期和课程时间查询比赛列表
+ */
+router.post('/getMatchByDateAndTime', (req, res) => {
+  // 处理查询参数
+  const query = {
+    matchDate: new Date(req.body.matchDate),
+    matchClassTime: req.body.time
+  }
+  // 需要分页查询
+  const options = {
+    page: req.body.page,
+    limit: req.body.limit,
+    sort: { _id: -1 },
+    lean: true
+  }
+  Match.paginate(query, options).then(matchList => {
+    return res.json({
+      code: 200,
+      count: matchList.totalDocs,
+      data: matchList.docs,
+      message: '查询成功',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
 /**
  * 比赛api，用于比赛创建及管理
  * @type {Router}

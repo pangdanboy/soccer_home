@@ -5,7 +5,7 @@
         <div class="match-area">
           <v-chip class="ma-2" color="primary">
             <v-icon left>
-              mdi-brightness-5
+              mdi-soccer-field
             </v-icon>
             <p style="margin: 0; font-size: 14px; font-weight: bold;">
               比赛场地：{{ matchInfo.matchArea }}
@@ -16,7 +16,7 @@
         <div class="match-info">
           <v-chip class="ma-2" color="primary">
             <v-icon left>
-              mdi-brightness-5
+              mdi-list-box-outline
             </v-icon>
             <h3 style="margin: 0; font-size: 16px; font-weight: bold;">
              比赛信息
@@ -26,7 +26,7 @@
             <div class="match-name">
               <v-chip class="ma-2" color="primary">
                 <v-icon left>
-                  mdi-brightness-5
+                  mdi-application-edit-outline
                 </v-icon>
                 <p style="margin: 0; font-size: 14px;">比赛名称：{{ matchInfo.matchName }}</p>
               </v-chip>
@@ -34,7 +34,7 @@
             <div class="match-type">
               <v-chip class="ma-2" color="primary">
                 <v-icon left>
-                  mdi-brightness-5
+                  mdi-format-list-bulleted-type
                 </v-icon>
                 <p style="margin: 0; font-size: 14px;" v-show="matchInfo.matchType === '1'">比赛类型：自由比赛</p>
                 <p style="margin: 0; font-size: 14px;" v-show="matchInfo.matchType === '2'">比赛类型：课程比赛</p>
@@ -44,7 +44,7 @@
             <div class="match-date">
               <v-chip class="ma-2" color="primary">
                 <v-icon left>
-                  mdi-brightness-5
+                  mdi-book-open-blank-variant
                 </v-icon>
                 <p style="margin: 0; font-size: 14px;">
                   比赛时间：{{ matchInfo.matchDate.split('T')[0] + '-' + CLASS_TIME_PARAMS_MAP[matchInfo.matchClassTime].name + '-' + CLASS_TIME_PARAMS_MAP[matchInfo.matchClassTime].time}}
@@ -53,23 +53,23 @@
             </div>
             <div class="match-des">
               <v-icon left style="color: #ffffff;">
-                mdi-brightness-5
+                mdi-book-open-outline
               </v-icon>
               <span>比赛描述：</span>
               <p style="margin: 0; font-size: 14px;">{{ matchInfo.matchDescription }}</p>
             </div>
             <div class="match-gamers">
               <v-icon left style="color: #ffffff;">
-                mdi-brightness-5
+                mdi-account-group-outline
               </v-icon>
               <span>比赛参赛人员({{ matchInfo.matchGamerList.length }}/10)：</span>
               <div class="gamer-list">
-                <template v-for="(item, index) in matchInfo.matchGamerList">
-                  <v-chip class="ma-2" color="green" link :key="item">
+                <template v-for="(item) in matchGamerInfo">
+                  <v-chip class="ma-2" color="green" link :key="item._id">
                     <v-icon left>
-                      mdi-brightness-5
+                      mdi-account-outline
                     </v-icon>
-                    <p style="margin: 0; font-size: 14px;">参赛者{{ index + 1 }}</p>
+                    <p style="margin: 0; font-size: 14px;">{{ item.username }}</p>
                   </v-chip>
                 </template>
               </div>
@@ -101,6 +101,7 @@ import { getMatchById, joinMatch, quitMatch } from '@/http/match'
 import { CLASS_TIME_PARAMS_MAP } from '@/constant'
 import commonDialog from '@/components/commonDialog'
 import { mapMutations } from 'vuex'
+import { getUserByIds } from '@/http/user'
 
 export default {
   name: 'matchDetail',
@@ -118,7 +119,10 @@ export default {
       title: '赛事详情',
       subTitle: '赛事详细信息，点击参加比赛，来绿茵场上尽情挥洒汗水吧！'
     },
+    // 赛事信息
     matchInfo: {},
+    // 赛事参加人员信息，根据matchInfo中的参赛人员列表查询获得
+    matchGamerInfo: [],
     // 二次确认弹框配置
     dialogConfig: {
       // 弹框打开与否
@@ -143,6 +147,12 @@ export default {
         console.log(res)
         if (res.success) {
           this.matchInfo = res.data
+          // 查询所有参赛者信息，初始化下拉框数据
+          getUserByIds({ userIds: this.matchInfo.matchGamerList }).then(userInfoList => {
+            this.matchGamerInfo = userInfoList.data
+          }).catch(err => {
+            console.log(err)
+          })
         } else {
           this.OPEN_MESSAGE({
             content: res.message,

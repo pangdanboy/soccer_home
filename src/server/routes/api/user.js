@@ -344,6 +344,28 @@ router.get('/getUserById', (req, res) => {
 })
 
 /**
+ * 根据id批量查询用户信息(max=10)
+ */
+router.get('/getUserByIds', (req, res) => {
+  const userIds = req.query.userIds
+  const findUserPromiseArr = []
+  userIds.forEach(userId => {
+    const findUserPromise = User.findOne({ _id: userId }, { _id: 1, username: 1 })
+    findUserPromiseArr.push(findUserPromise)
+  })
+  Promise.all(findUserPromiseArr).then(userList => {
+    return res.json({
+      code: 200,
+      data: userList,
+      message: '查询成功！',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(err, res)
+  })
+})
+
+/**
  * 根据用户输入查询用户信息，返回id和username
  */
 router.get('/getUserByInput', (req, res) => {
