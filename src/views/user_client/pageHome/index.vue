@@ -45,13 +45,14 @@
 <script>
 import timeTable from '@/components/timeTable.vue'
 import { getWeekDays } from '@/utils'
-import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME_PARAMS_MAP } from '@/constant'
+import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME_PARAMS_MAP, MATCH_TYPE_PARAMS_MAP } from '@/constant'
 import filterHeader from './components/filterHeader.vue'
 import matchItem from '@/views/user_client/pageHome/components/matchItem.vue'
 import weekMatchList from '@/views/user_client/pageHome/components/weekMatchList.vue'
 import moment from 'moment'
 import { queryMatch, getMatchByDateAndTime } from '@/http/match'
 import { mapMutations } from 'vuex'
+import { getCurrentUserInfo } from '@/http/user'
 
 export default {
   name: 'pageHome',
@@ -63,7 +64,7 @@ export default {
   },
   data: () => ({
     // 用户每周空闲时间列表
-    freeTimeList: ['1-1', '4-3', '7-1'],
+    freeTimeList: [],
     // 按周查看比赛列表数据
     weekMatchList: [],
     // 当前时间所处周日期，可切换为未来时间的周
@@ -190,6 +191,7 @@ export default {
       status: false,
       title: '比赛列表',
       time: '',
+      free: false,
       matchList: [],
       date: '',
       classTime: '',
@@ -197,12 +199,15 @@ export default {
       page: 1,
       limit: 5,
       totalCount: 0
-    }
+    },
+    // 按周查看比赛类型筛选条件
+    weekMatchType: ''
   }),
   mounted () {
     // 获取当前日期所处周
     this.weekDayDate = getWeekDays(new Date())
     this.getDataList()
+    this.getUserInfo()
   },
   computed: {
   },
@@ -222,6 +227,16 @@ export default {
       this.filterConfig.all = true
       this.getDataList(1)
     },
+    // 获取用户信息，时间协作数据
+    getUserInfo () {
+      getCurrentUserInfo().then(res => {
+        if (res.success) {
+          this.freeTimeList = res.data.freeTimeList
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
     // 获取比赛列表
     getDataList (page) {
       const query = {}
@@ -237,7 +252,14 @@ export default {
         if (item.type !== 'button') query[item.key] = item.value
       })
       // 处理比赛类型参数
-      if (query.matchType) query.matchType = MATCH_TYPE_PARAMS[query.matchType]
+      if (query.matchType) {
+        query.matchType = MATCH_TYPE_PARAMS[query.matchType]
+        // 保存按周查看比赛时，筛选的比赛类型参数
+        this.weekMatchType = query.matchType
+      } else {
+        // 清除筛选的比赛类型参数
+        this.weekMatchType = ''
+      }
       // 如果当前是按周查看，添加日期范围参数
       if (!this.showAllMatchList) query.matchDate = [this.weekDayDate[0], this.weekDayDate[this.weekDayDate.length - 1]]
       queryMatch(query).then(res => {
@@ -276,27 +298,39 @@ export default {
       this.getDataList()
     },
     // 按周查看时点击存在比赛的天，查询该天的比赛列表
-    openWeekMatchList (date, classTime) {
+    openWeekMatchList (date, classTime, free) {
+      console.log(free)
       console.log('查询该天该讲比赛列表', date, classTime)
       this.weekMatchListConfig.status = true
       this.weekMatchListConfig.date = date
+      this.weekMatchListConfig.free = free
       this.weekMatchListConfig.classTime = classTime
       this.weekMatchListConfig.time = date + '-' + CLASS_TIME_PARAMS_MAP[classTime.split('-')[1]].name + '-' + CLASS_TIME_PARAMS_MAP[classTime.split('-')[1]].time
       // 查询该天该讲比赛列表
       this.getWeekDayMatchList()
     },
+    // 获取改天该讲的比赛列表数据
     getWeekDayMatchList () {
       // 查询该天该讲比赛列表
       getMatchByDateAndTime({
         matchDate: this.weekMatchListConfig.date,
         time: this.weekMatchListConfig.classTime.split('-')[1],
         page: this.weekMatchListConfig.page,
-        limit: this.weekMatchListConfig.limit
+        limit: this.weekMatchListConfig.limit,
+        matchType: this.weekMatchType
       }).then(res => {
         this.weekMatchListConfig.matchList = res.data
         this.weekMatchListConfig.totalCount = res.count
+        this.handlerMatchData()
       }).catch(err => {
         console.log(err)
+      })
+    },
+    handlerMatchData () {
+      this.weekMatchListConfig.matchList.forEach(item => {
+        item.matchDate = item.matchDate.split('T')[0]
+        item.matchType = MATCH_TYPE_PARAMS_MAP[item.matchType]
+        item.matchClassTime = CLASS_TIME_PARAMS_MAP[item.matchClassTime].name + '--' + CLASS_TIME_PARAMS_MAP[item.matchClassTime].time
       })
     },
     // 改天该讲比赛列表分页发生变化时，重新查询比赛列表
@@ -304,8 +338,10 @@ export default {
       this.weekMatchListConfig.page = page
       this.getWeekDayMatchList()
     },
+    // 关闭弹框，重置page，下次打开另一个弹框时保持从第一页开始显示
     closeWeekDayDialog () {
       this.weekMatchListConfig.status = false
+      this.weekMatchListConfig.page = 1
     }
   },
   watch: {

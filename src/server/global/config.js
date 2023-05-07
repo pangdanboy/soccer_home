@@ -46,6 +46,18 @@ const routes = ['pageHome', 'pageLogin', 'pageMessageCenter', 'pageNews', 'pageC
 //     routes: [...commonRoutes]
 //   }
 // }
+
+// 日期
+const DATE = {
+  1: '周一',
+  2: '周二',
+  3: '周三',
+  4: '周四',
+  5: '周五',
+  6: '周六',
+  7: '周日'
+}
+
 const secretOrKey = 'secret'
 module.exports = {
   MongoDB,
@@ -53,5 +65,6 @@ module.exports = {
   secretOrKey,
   userAvatar,
   routes,
-  USER_PERMISSIONS
+  USER_PERMISSIONS,
+  DATE
 }

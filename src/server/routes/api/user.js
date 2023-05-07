@@ -349,6 +349,14 @@ router.get('/getUserById', (req, res) => {
 router.get('/getUserByIds', (req, res) => {
   const userIds = req.query.userIds
   const findUserPromiseArr = []
+  if (!userIds) {
+    return res.json({
+      code: 200,
+      data: [],
+      message: '查询成功！',
+      success: true
+    })
+  }
   userIds.forEach(userId => {
     const findUserPromise = User.findOne({ _id: userId }, { _id: 1, username: 1 })
     findUserPromiseArr.push(findUserPromise)

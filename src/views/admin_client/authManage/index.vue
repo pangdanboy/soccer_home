@@ -1,10 +1,10 @@
 <template>
-  <div id="match_manage">比赛管理</div>
+  <div id="auth_manage"></div>
 </template>
 
 <script>
 export default {
-  name: 'matchMange'
+  name: 'authManage'
 }
 </script>
 

@@ -1,11 +1,15 @@
 <template>
   <div id="week_match_list">
-    <v-dialog v-model="dialog" width="500px">
+    <v-dialog v-model="dialog" width="700px">
       <v-card>
-        <v-card-title class="text-h5 grey lighten-2">
+        <v-card-title class="text-h5 grey lighten-2 mb-2 flex-column">
           {{ weekMatchListConfig.title }}
+          <span style="font-size: 14px;">{{ weekMatchListConfig.time }}</span>
+          <span class="tips" style="color: #e84134; font-size: 14px;" v-show="!weekMatchListConfig.free">
+            <v-icon style="color: #e84134; font-size: 16px;">mdi-alert-circle-outline</v-icon>
+            <span>该时间段存在课程，请注意时间安排</span>
+          </span>
         </v-card-title>
-        <v-card-subtitle>{{ weekMatchListConfig.time }}</v-card-subtitle>
 
         <v-card-text>
           <v-data-table
@@ -40,7 +44,7 @@
           <v-btn
             color="primary"
             text
-            @click="() => this.$emit('close')"
+            @click="closeDialog"
           >
             关闭
           </v-btn>
@@ -76,6 +80,13 @@ export default {
   }),
   methods: {
     checkMatchDetail (match) {
+      const { _id: matchId } = match
+      // 跳转到比赛详情页，传递matchId
+      this.$router.push('/pageMatchDetail?matchId=' + matchId)
+    },
+    closeDialog () {
+      this.userMatchListOptions.page = 1
+      this.$emit('close')
     }
   },
   watch: {
@@ -91,7 +102,7 @@ export default {
     },
     userMatchListOptions: {
       handler () {
-        this.$emit('weekDayMatchListPageChange', this.userMatchListOptions.page)
+        this.$emit('pageChange', this.userMatchListOptions.page)
       },
       deep: true
     }

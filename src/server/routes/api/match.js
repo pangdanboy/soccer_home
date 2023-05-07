@@ -246,6 +246,7 @@ router.post('/getMatchByDateAndTime', (req, res) => {
     matchDate: new Date(req.body.matchDate),
     matchClassTime: req.body.time
   }
+  if (req.body.matchType) query.matchType = req.body.matchType
   // 需要分页查询
   const options = {
     page: req.body.page,

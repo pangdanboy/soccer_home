@@ -79,44 +79,54 @@ const routes = [
     }
   },
   {
-    path: '/pageAdmin/overview',
+    path: '/pageAdmin',
     name: 'overview',
     component: () => import('../views/admin_client/overview/index.vue'),
     meta: {
       isAuth: true
-    }
-  },
-  {
-    path: '/pageAdmin/matchManage',
-    name: 'matchManage',
-    component: () => import('../views/admin_client/matchManage/index.vue'),
-    meta: {
-      isAuth: true
-    }
-  },
-  {
-    path: '/pageAdmin/areaManage',
-    name: 'areaManage',
-    component: () => import('../views/admin_client/areaManage/index.vue'),
-    meta: {
-      isAuth: true
-    }
-  },
-  {
-    path: '/pageAdmin/userManage',
-    name: 'userManage',
-    component: () => import('../views/admin_client/userManage/index.vue'),
-    meta: {
-      isAuth: true
-    }
-  },
-  {
-    path: '/pageAdmin/communityManage',
-    name: 'communityManage',
-    component: () => import('../views/admin_client/communityManage/index.vue'),
-    meta: {
-      isAuth: true
-    }
+    },
+    children: [
+      {
+        path: 'matchManage',
+        name: 'matchManage',
+        component: () => import('../views/admin_client/matchManage/index.vue'),
+        meta: {
+          isAuth: true
+        }
+      },
+      {
+        path: 'areaManage',
+        name: 'areaManage',
+        component: () => import('../views/admin_client/areaManage/index.vue'),
+        meta: {
+          isAuth: true
+        }
+      },
+      {
+        path: 'userManage',
+        name: 'userManage',
+        component: () => import('../views/admin_client/userManage/index.vue'),
+        meta: {
+          isAuth: true
+        }
+      },
+      {
+        path: 'authManage',
+        name: 'authManage',
+        component: () => import('../views/admin_client/authManage/index.vue'),
+        meta: {
+          isAuth: true
+        }
+      },
+      {
+        path: 'communityManage',
+        name: 'communityManage',
+        component: () => import('../views/admin_client/communityManage/index.vue'),
+        meta: {
+          isAuth: true
+        }
+      }
+    ]
   }
 ]
 
