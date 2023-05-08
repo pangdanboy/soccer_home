@@ -51,7 +51,7 @@ import matchItem from '@/views/user_client/pageHome/components/matchItem.vue'
 import weekMatchList from '@/views/user_client/pageHome/components/weekMatchList.vue'
 import moment from 'moment'
 import { queryMatch, getMatchByDateAndTime } from '@/http/match'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { getCurrentUserInfo } from '@/http/user'
 
 export default {
@@ -207,9 +207,13 @@ export default {
     // 获取当前日期所处周
     this.weekDayDate = getWeekDays(new Date())
     this.getDataList()
-    this.getUserInfo()
+    // 如果用户已经登录查询用户时间协作数据
+    if (localStorage.getItem('userToken')) {
+      this.getUserInfo()
+    }
   },
   computed: {
+    ...mapGetters(['USER_LOGIN_STATUS'])
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),

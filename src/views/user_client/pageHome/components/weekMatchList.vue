@@ -5,10 +5,21 @@
         <v-card-title class="text-h5 grey lighten-2 mb-2 flex-column">
           {{ weekMatchListConfig.title }}
           <span style="font-size: 14px;">{{ weekMatchListConfig.time }}</span>
-          <span class="tips" style="color: #e84134; font-size: 14px;" v-show="!weekMatchListConfig.free">
-            <v-icon style="color: #e84134; font-size: 16px;">mdi-alert-circle-outline</v-icon>
-            <span>该时间段存在课程，请注意时间安排</span>
-          </span>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+               <span
+                 class="tips"
+                 style="color: #e84134; font-size: 14px;"
+                 v-show="!weekMatchListConfig.free && USER_LOGIN_STATUS"
+                 v-on="on"
+                 v-bind="attrs"
+               >
+                 <v-icon style="color: #e84134; font-size: 16px;">mdi-alert-circle-outline</v-icon>
+                 <span>该时间段存在课程，请注意时间安排</span>
+               </span>
+            </template>
+            <span>你的课表显示你该时间段存在课程安排或者其他安排；或者你未初始化课表状态，进入个人中心-我的课表进行更改</span>
+          </v-tooltip>
         </v-card-title>
 
         <v-card-text>
@@ -55,6 +66,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'weekMatchList',
   props: {
@@ -63,6 +75,9 @@ export default {
       required: true,
       default: () => ({})
     }
+  },
+  computed: {
+    ...mapGetters(['USER_LOGIN_STATUS'])
   },
   data: () => ({
     dialog: false,
