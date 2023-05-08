@@ -3,8 +3,8 @@ const router = express.Router()
 const passport = require('passport')
 const { Match } = require('./../../utlis/db/mongoose/models/match')
 const { commonThrow } = require('../../utlis/throw')
-// const { verifyUserRole } = require('./../../utlis/tools')
-// const { USER_PERMISSIONS } = require('./../../global/config')
+const { verifyUserRole } = require('./../../utlis/tools')
+const { USER_PERMISSIONS } = require('./../../global/config')
 
 /**
  * 比赛创建
@@ -207,8 +207,16 @@ router.post('/userCreateMatch', passport.authenticate('jwt', { session: false })
 router.post('/deleteMatch', passport.authenticate('jwt', { session: false }), (req, res) => {
   const deleteMatchId = req.body.matchId
   const userId = req.user._id.toString()
+  const userRole = req.user.role
+  let query = {}
+  // 如果用户角色为超级管理员，则无需校验比赛是否用户创建
+  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    query = { _id: deleteMatchId }
+  } else {
+    query = { $and: [{ _id: deleteMatchId }, { createMatchUserId: userId }] }
+  }
   // 匹配删除用户是否为删除比赛的创建者，如果是才删除该比赛
-  Match.deleteOne({ $and: [{ _id: deleteMatchId }, { createMatchUserId: userId }] }).then(deleteRes => {
+  Match.deleteOne(query).then(deleteRes => {
     return res.json({
       code: 200,
       data: {},

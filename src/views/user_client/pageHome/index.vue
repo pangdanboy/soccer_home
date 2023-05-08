@@ -46,7 +46,7 @@
 import timeTable from '@/components/timeTable.vue'
 import { getWeekDays } from '@/utils'
 import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME_PARAMS_MAP, MATCH_TYPE_PARAMS_MAP } from '@/constant'
-import filterHeader from './components/filterHeader.vue'
+import filterHeader from '@/components/filterHeader'
 import matchItem from '@/views/user_client/pageHome/components/matchItem.vue'
 import weekMatchList from '@/views/user_client/pageHome/components/weekMatchList.vue'
 import moment from 'moment'
@@ -103,8 +103,7 @@ export default {
         operationList: [
           {
             text: '按周查看',
-            event: 'toggleWeekShow',
-            icon: 'mdi'
+            event: 'toggleWeekShow'
           }
         ]
       }
@@ -125,20 +124,17 @@ export default {
         operationList: [
           {
             text: '查看全部',
-            event: 'toggleAllShow',
-            icon: 'mdi'
+            event: 'toggleAllShow'
           },
           {
             text: '查看上一周',
             event: 'changeWeekData',
-            type: 'last',
-            icon: 'mdi'
+            type: 'last'
           },
           {
             text: '查看下一周',
             event: 'changeWeekData',
-            type: 'next',
-            icon: 'mdi'
+            type: 'next'
           }
         ]
       }
@@ -147,6 +143,7 @@ export default {
     filterConfig: {
       // 是否查看所有比赛列表
       all: true,
+      size: 'normal',
       // 过滤条件
       filterList: [
         {
@@ -175,8 +172,7 @@ export default {
           operationList: [
             {
               text: '按周查看',
-              event: 'toggleWeekShow',
-              icon: 'mdi'
+              event: 'toggleWeekShow'
             }
           ]
         }
@@ -264,7 +260,7 @@ export default {
         // 清除筛选的比赛类型参数
         this.weekMatchType = ''
       }
-      // 如果当前是按周查看，添加日期范围参数
+      // 如果当前是按周查看，添加以周为单位日期范围参数
       if (!this.showAllMatchList) query.matchDate = [this.weekDayDate[0], this.weekDayDate[this.weekDayDate.length - 1]]
       queryMatch(query).then(res => {
         console.log(res)

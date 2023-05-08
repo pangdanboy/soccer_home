@@ -70,7 +70,6 @@
         <template v-slot:extension>
           <v-tabs align-with-title>
             <v-tab to="/pageHome">赛事中心</v-tab>
-            <v-tab to="/pageNews">新闻</v-tab>
             <v-tab to="/pageCommunity">社区</v-tab>
           </v-tabs>
         </template>

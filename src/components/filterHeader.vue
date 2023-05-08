@@ -55,12 +55,15 @@
               clearable @change="() => $emit('getDataList', 1)"
             ></v-select>
           </v-col>
-          <v-col :key="item.key" class="filter-operation" v-if="item.type === 'button'" :cols="filterConfig.all ? 2:8">
+          <v-col :key="item.key" class="filter-operation" v-if="item.type === 'button'" :cols="filterConfig.all ? 3:8">
             <v-btn
               v-for="(operation, index) in item.operationList"
               :key="index" @click="handleClick(operation.event, operation.type)"
               class="primary"
-            >{{ operation.text }}</v-btn>
+            >
+              <v-icon left v-show="operation.icon">{{ operation.icon ? operation.icon : '' }}</v-icon>
+              {{ operation.text }}
+            </v-btn>
           </v-col>
         </template>
       </v-row>

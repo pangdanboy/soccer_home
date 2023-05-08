@@ -10,18 +10,7 @@ const { sendEmail, random } = require('../../utlis/tools')
 const { User } = require('../../utlis/db/mongoose/models/user')
 
 /**
- * path: api/user/register
- * des: 用户注册接口
- * return: {
- *   // 状态码
- *   code: '',
- *   // 数据
- *   data: {},
- *   // 提示信息
- *   message: '',
- *   // 是否成功标志
- *   success: true||false
- * }
+ * 用户注册接口
  */
 router.post('/register', (req, res) => {
   const userEmail = req.body.email
@@ -73,18 +62,7 @@ router.post('/register', (req, res) => {
 })
 
 /**
- * path: api/user/login
- * des: 用户登录接口
- * return: {
- *   // 状态码
- *   code: '',
- *   // 数据
- *   data: {},
- *   // 提示信息
- *   message: '',
- *   // 是否成功标志
- *   success: true||false
- * }
+ * 用户登录接口
  */
 router.post('/login', (req, res) => {
   const email = req.body.email
@@ -132,18 +110,7 @@ router.post('/login', (req, res) => {
 })
 
 /**
- * path: api/user/verify
- * des: 发送邮箱验证码接口
- * return: {
- *   // 状态码
- *   code: '',
- *   // 数据
- *   data: {},
- *   // 提示信息
- *   message: '',
- *   // 是否成功标志
- *   success: true||false
- * }
+ * 发送邮箱验证码接口
  */
 router.get('/verify', (req, res) => {
   const verifyCode = Math.floor(Math.random() * 1000000)
@@ -170,17 +137,7 @@ router.get('/verify', (req, res) => {
 })
 
 /**
- * path: api/user/current
  * des: 返回当前登录用户信息接口
- * return: {
- *   // 状态码
- *   code: '',
- *   // 数据
- *   data: {},
- *   // 提示信息
- *   message: '',
- *   // 是否成功标志
- *   success: true||false
  * }
  */
 router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
@@ -201,18 +158,7 @@ router.get('/current', passport.authenticate('jwt', { session: false }), (req, r
 })
 
 /**
- * path: api/user/edit
- * des: 修改用户信息接口, 基础信息修改和绑定邮箱修改(base) || 密码修改(pwd) || 时间协作数据修改(freeTimeList)
- * return: {
- *   // 状态码
- *   code: '',
- *   // 数据
- *   data: {},
- *   // 提示信息
- *   message: '',
- *   // 是否成功标志
- *   success: true||false
- * }
+ * 修改用户信息接口, 基础信息修改和绑定邮箱修改(base) || 密码修改(pwd) || 时间协作数据修改(freeTimeList)
  */
 router.put('/edit', passport.authenticate('jwt', { session: false }), (req, res) => {
   // 当前需要修改信息的用户
@@ -306,18 +252,7 @@ router.put('/edit', passport.authenticate('jwt', { session: false }), (req, res)
 })
 
 /**
- * path: api/user/getUserById
- * des: 根据id查询用户信息
- * return: {
- *   // 状态码
- *   code: '',
- *   // 数据
- *   data: {},
- *   // 提示信息
- *   message: '',
- *   // 是否成功标志
- *   success: true||false
- * }
+ * 根据id查询用户信息
  */
 router.get('/getUserById', (req, res) => {
   // eslint-disable-next-line camelcase
