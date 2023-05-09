@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const { Match } = require('./../../utlis/db/mongoose/models/match')
-// const { User } = require('./../../utlis/db/mongoose/models/user')
+const { Area } = require('./../../utlis/db/mongoose/models/area')
 const { commonThrow, authThrow } = require('../../utlis/throw')
 const { verifyUserRole } = require('./../../utlis/tools')
 const { USER_PERMISSIONS } = require('./../../global/config')
@@ -21,7 +21,7 @@ router.post('/create', passport.authenticate('jwt', { session: false }), (req, r
     matchName: req.body.matchName,
     matchDate: req.body.matchDate,
     matchClassTime: req.body.matchClassTime,
-    matchArea: req.body.matchArea,
+    matchAreaId: req.body.matchAreaId,
     matchType: req.body.matchType,
     matchDescription: req.body.matchDescription,
     matchGamerList: req.body.matchGamerList,
@@ -235,12 +235,66 @@ router.post('/deleteMatch', passport.authenticate('jwt', { session: false }), (r
 router.get('/getMatchById', (req, res) => {
   const matchId = req.query.matchId
   Match.findOne({ _id: matchId }).then(match => {
-    return res.json({
-      code: 200,
-      data: match,
-      message: '查询成功',
-      success: true
+    Area.findOne({ _id: match.matchAreaId }, { _id: 1, areaName: 1, areaCover: 1 }).then(area => {
+      console.log(area)
+      return res.json({
+        code: 200,
+        data: {
+          match: match,
+          area: area
+        },
+        message: '查询成功',
+        success: true
+      })
+    }).catch(err => {
+      commonThrow(res, err)
     })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 根据日期和课程时间查询可用场地
+ */
+router.post('/getFreeArea', (req, res) => {
+  // 处理查询参数
+  const query = {
+    matchDate: new Date(req.body.matchDate),
+    matchClassTime: req.body.matchClassTime
+  }
+  Match.find(query, { matchAreaId: 1 }).then(matchList => {
+    console.log(matchList)
+    if (matchList.length === 0) {
+      // 查询所有可用比赛场地，作为比赛创建时的待选场地
+      Area.find({ areaStatus: '1' }, { _id: 1, areaName: 1 }).then(areaList => {
+        return res.json({
+          code: 200,
+          data: areaList,
+          message: '查询成功',
+          success: true
+        })
+      }).catch(err => {
+        commonThrow(res, err)
+      })
+    } else {
+      // 保存指定日期指定讲比赛的场地id
+      const areaId = []
+      matchList.forEach(item => {
+        areaId.push(item.matchAreaId)
+      })
+      // 查询所有比赛场地id不在areaId中的场地中的且可用的比赛，作为比赛创建时的待选场地
+      Area.find({ _id: { $nin: areaId }, areaStatus: '1' }, { _id: 1, areaName: 1 }).then(areaList => {
+        return res.json({
+          code: 200,
+          data: areaList,
+          message: '查询成功',
+          success: true
+        })
+      }).catch(err => {
+        commonThrow(res, err)
+      })
+    }
   }).catch(err => {
     commonThrow(res, err)
   })
@@ -292,12 +346,6 @@ router.get('/export', passport.authenticate('jwt', { session: false }), (req, re
           localField: 'createMatchUserId',
           foreignField: '_id',
           as: 'userInfo'
-        },
-        {
-          from: 'area',
-          localField: 'areaId',
-          foreignField: '_id',
-          as: 'areaInfo'
         }
       ]
     }

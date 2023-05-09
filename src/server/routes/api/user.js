@@ -291,7 +291,8 @@ router.get('/getUserByIds', (req, res) => {
       success: true
     })
   }
-  User.find({ $match: { _id: { $in: userIds } } }, { _id: 1, username: 1 }).then(userList => {
+  console.log(userIds)
+  User.find({ _id: { $in: userIds } }, { _id: 1, username: 1 }).then(userList => {
     return res.json({
       code: 200,
       data: userList,

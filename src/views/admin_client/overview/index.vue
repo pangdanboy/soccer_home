@@ -48,11 +48,11 @@
               </v-list-item-icon>
               <v-list-item-title>用户管理</v-list-item-title>
             </v-list-item>
-            <v-list-item link to="/pageAdmin/authManage">
+            <v-list-item link to="/pageAdmin/communityManage">
               <v-list-item-icon>
                 <v-icon>mdi-star</v-icon>
               </v-list-item-icon>
-              <v-list-item-title>权限管理</v-list-item-title>
+              <v-list-item-title>社区管理</v-list-item-title>
             </v-list-item>
             <v-list-item link to="/pageHome">
               <v-list-item-icon>

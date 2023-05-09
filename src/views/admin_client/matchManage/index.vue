@@ -2,7 +2,7 @@
   <div id="match_manage">
     <detail :detail-config="detailConfig">
       <template #content>
-        <filter-header :filter-config="filterConfig" @getDataList="getMatchList" @addMatch="addMatch" @exportMatch="exportMatch"></filter-header>
+        <filter-header :filter-config="filterConfig" @getDataList="getMatchList" @addMatch="addMatch"></filter-header>
         <v-data-table
           :headers="matchListHeaders"
           :items="matchList"
@@ -57,7 +57,7 @@
 import detail from '@/components/detail'
 import filterHeader from '@/components/filterHeader'
 import { CLASS_TIME_PARAMS_MAP, MATCH_TYPE, MATCH_TYPE_PARAMS, MATCH_TYPE_PARAMS_MAP } from '@/constant'
-import { deleteMatch, queryMatch, exportMatch } from '@/http/match'
+import { deleteMatch, queryMatch } from '@/http/match'
 import commonDialog from '@/components/commonDialog'
 import { mapMutations } from 'vuex'
 // import { matchExport } from '@/utils/excel'
@@ -71,8 +71,8 @@ export default {
   data: () => ({
     // 比赛列表数据
     matchList: [],
-    // 导出比赛数据
-    exportMatchList: [],
+    // // 导出比赛数据
+    // exportMatchList: [],
     // 比赛总数
     matchTotalCount: 0,
     // 比赛数据表格的头
@@ -122,11 +122,11 @@ export default {
           label: '比赛数据操作',
           key: 'matchOperation',
           operationList: [
-            {
-              text: '导出',
-              event: 'exportMatch',
-              icon: 'mdi-database-export-outline'
-            },
+            // {
+            //   text: '导出',
+            //   event: 'exportMatch',
+            //   icon: 'mdi-database-export-outline'
+            // },
             {
               text: '添加',
               event: 'addMatch',
@@ -155,13 +155,13 @@ export default {
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
-    exportMatch () {
-      exportMatch().then(res => {
-        console.log(res)
-        if (res.success) this.exportMatchList = res.data
-      })
-      // matchExport('比赛列表', this.exportMatchList)
-    },
+    // exportMatch () {
+    //   exportMatch().then(res => {
+    //     console.log(res)
+    //     if (res.success) this.exportMatchList = res.data
+    //   })
+    //   // matchExport('比赛列表', this.exportMatchList)
+    // },
     addMatch () {
       this.$router.push('/pageMatch')
     },

@@ -33,7 +33,7 @@ router.post('/addArea', passport.authenticate('jwt', { session: false }), (req, 
 })
 
 /**
- * 查询场地信息
+ * 查询场地信息列表
  */
 router.post('/queryArea', passport.authenticate('jwt', { session: false }), (req, res) => {
   const userRole = req.user.role
@@ -55,6 +55,76 @@ router.post('/queryArea', passport.authenticate('jwt', { session: false }), (req
       data: areaList.docs,
       message: '查询成功',
       success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 修改场地状态
+ */
+router.post('/changeStatus', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userRole = req.user.role
+  const areaId = req.body.areaId
+  const status = req.body.areaStatus
+  if (!verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    return authThrow(res)
+  }
+  Area.updateOne({ _id: areaId }, { areaStatus: status }).then(updateRes => {
+    return res.json({
+      code: 200,
+      data: [],
+      success: true,
+      message: '修改成功！'
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 删除场地
+ */
+router.post('/deleteArea', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userRole = req.user.role
+  const areaId = req.body.areaId
+  if (!verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    return authThrow(res)
+  }
+  Area.deleteOne({ _id: areaId }).then(deleteRes => {
+    return res.json({
+      code: 200,
+      data: [],
+      success: true,
+      message: '修改成功！'
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 编辑场地信息
+ */
+router.post('/editArea', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userRole = req.user.role
+  const areaId = req.body.areaId
+  if (!verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    return authThrow(res)
+  }
+  const updateColumns = {
+    areaName: req.body.areaName,
+    areaPosition: req.body.areaPosition,
+    areaStatus: req.body.areaStatus,
+    areaCover: req.body.areaCover
+  }
+  Area.updateOne({ _id: areaId }, updateColumns).then(deleteRes => {
+    return res.json({
+      code: 200,
+      data: [],
+      success: true,
+      message: '修改成功！'
     })
   }).catch(err => {
     commonThrow(res, err)

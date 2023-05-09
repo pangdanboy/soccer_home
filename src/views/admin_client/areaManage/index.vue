@@ -17,16 +17,6 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
-                  @click="checkAreaDetail(item)"
-                  style="cursor: pointer; margin-right: 10px;"
-                  v-bind="attrs" v-on="on"
-                >mdi-text-search-variant</v-icon>
-              </template>
-              <span>查看详情</span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-icon
                   @click="openDeleteDialog(item)"
                   style="cursor: pointer; margin-right: 10px;"
                   v-bind="attrs" v-on="on"
@@ -37,12 +27,22 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
-                  @click="editArea(item)"
-                  style="cursor: pointer;"
+                  @click="openEditAreaDialog(item)"
+                  style="cursor: pointer; margin-right: 10px;"
                   v-bind="attrs" v-on="on"
                 >mdi-square-edit-outline</v-icon>
               </template>
               <span>编辑比赛</span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-icon
+                  @click="openChangeStatusDialog(item)"
+                  style="cursor: pointer;"
+                  v-bind="attrs" v-on="on"
+                >{{ item.areaStatus === '可用' ? 'mdi-lock-open-variant-outline' : 'mdi-lock-open-outline' }}</v-icon>
+              </template>
+              <span>修改场地状态</span>
             </v-tooltip>
           </template>
         </v-data-table>
@@ -50,6 +50,8 @@
     </detail>
     <!-- 删除场地二次确认弹框 -->
     <common-dialog :dialog-config="deleteDialogConfig" @close="closeDeleteDialog" @delete="deleteArea"></common-dialog>
+    <!-- 修改场地状态二次确认弹框 -->
+    <common-dialog :dialog-config="changeStatusDialogConfig" @close="closeChangeStatusDialog" @change="changeAreaStatus"></common-dialog>
     <!-- 添加场地弹框 -->
     <v-dialog v-model="addAreaDialogConfig.status" width="60%">
       <v-card>
@@ -108,7 +110,8 @@
           </v-form>
         </v-card-text>
         <v-card-actions style="padding-top: 0; display: flex; align-items: center; justify-content: flex-end">
-          <v-btn @click="addArea">添加</v-btn>
+          <v-btn @click="addArea" v-show="addAreaDialogConfig.type ==='add'">添加</v-btn>
+          <v-btn @click="editArea" v-show="addAreaDialogConfig.type ==='edit'">修改</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -121,7 +124,7 @@ import filterHeader from '@/components/filterHeader'
 // import { CLASS_TIME_PARAMS_MAP, MATCH_TYPE, MATCH_TYPE_PARAMS, MATCH_TYPE_PARAMS_MAP } from '@/constant'
 import commonDialog from '@/components/commonDialog'
 import { uploadAreaCover } from '@/http/upload'
-import { addArea, queryArea } from '@/http/area'
+import { addArea, queryArea, changeStatus, deleteArea, editArea } from '@/http/area'
 import { mapMutations } from 'vuex'
 export default {
   name: 'areaManage',
@@ -190,12 +193,14 @@ export default {
       // 待删除的场地id
       deleteAreaId: ''
     },
-    // 添加比赛场地弹框
+    // 添加(修改)比赛场地弹框
     addAreaDialogConfig: {
       status: false,
       title: '添加场地',
       subTitle: '场地多多，比赛多多',
       type: 'add',
+      // 待编辑场地id
+      editAreaId: '',
       // 场地信息
       data: {
         areaName: {
@@ -234,6 +239,21 @@ export default {
           v => !!v || '场地状态不能为空！'
         ]
       }
+    },
+    // 修改比赛状态二次确认弹框配置
+    changeStatusDialogConfig: {
+      // 弹框打开与否
+      status: false,
+      // 弹框标题
+      title: '修改场地状态',
+      // 弹框内容
+      content: '',
+      // 弹框确认触发事件
+      event: 'change',
+      // 需要修改成为的状态
+      changeStatus: '',
+      // 待修改状态的场地id
+      changeAreaId: ''
     }
   }),
   mounted () {
@@ -241,6 +261,13 @@ export default {
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
+    initFormData () {
+      this.addAreaDialogConfig.data.areaName.value = ''
+      this.addAreaDialogConfig.data.areaPosition.value = ''
+      this.addAreaDialogConfig.data.areaStatus.value = ''
+      this.addAreaDialogConfig.data.areaCover.value = null
+    },
+    // 获取场地列表
     getAreaList (page) {
       const query = {}
       if (page) {
@@ -263,13 +290,22 @@ export default {
         console.log(err)
       })
     },
+    // 处理场地列表数据
     handlerAreaData () {
       this.areaList.forEach(item => {
         item.areaStatus = item.areaStatus === '1' ? '可用' : '不可用'
       })
     },
+    // 打开添加场地弹框
     openAddAreaDialog () {
       this.addAreaDialogConfig.status = true
+      if (this.addAreaDialogConfig.data.areaName.value) {
+        this.addAreaDialogConfig.type = 'edit'
+        this.addAreaDialogConfig.title = '编辑场地'
+      } else {
+        this.addAreaDialogConfig.type = 'add'
+        this.addAreaDialogConfig.title = '添加场地'
+      }
     },
     // 图片上传
     upload () {
@@ -302,20 +338,105 @@ export default {
         if (res.success) {
           this.addAreaDialogConfig.status = false
           this.getAreaList(1)
+          this.initFormData()
         }
       }).catch(err => {
         console.log(err)
       })
     },
-    checkAreaDetail () {},
-    editArea () {},
-    deleteArea () {},
+    // 编辑比赛
+    editArea () {
+      if (!this.$refs.areaForm.validate()) return
+      const params = {
+        areaId: this.addAreaDialogConfig.editAreaId,
+        areaName: this.addAreaDialogConfig.data.areaName.value,
+        areaPosition: this.addAreaDialogConfig.data.areaPosition.value,
+        areaStatus: this.addAreaDialogConfig.data.areaStatus.value === '可用' ? '1' : '0',
+        areaCover: this.addAreaDialogConfig.data.areaCover.uploadUrl
+      }
+      editArea(params).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) {
+          this.addAreaDialogConfig.status = false
+          this.getAreaList(1)
+          this.initFormData()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    // 打开比赛编辑弹框
+    openEditAreaDialog (area) {
+      // 填充场地信息
+      this.addAreaDialogConfig.data.areaName.value = area.areaName
+      this.addAreaDialogConfig.data.areaPosition.value = area.areaPosition
+      this.addAreaDialogConfig.data.areaStatus.value = area.areaStatus
+      this.addAreaDialogConfig.data.areaCover.uploadUrl = area.areaCover
+      this.addAreaDialogConfig.editAreaId = area._id
+      // 打开弹框
+      this.openAddAreaDialog()
+    },
+    // 删除比赛
+    deleteArea () {
+      deleteArea({
+        areaId: this.deleteDialogConfig.deleteAreaId
+      }).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) {
+          this.getAreaList()
+          this.deleteDialogConfig.status = false
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    // 修改比赛状态
+    changeAreaStatus () {
+      changeStatus({
+        areaId: this.changeStatusDialogConfig.changeAreaId,
+        areaStatus: this.changeStatusDialogConfig.changeStatus
+      }).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) {
+          this.getAreaList()
+          this.changeStatusDialogConfig.status = false
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    // 打开删除场地弹框
     openDeleteDialog (area) {
       this.deleteDialogConfig.status = true
       this.deleteDialogConfig.deleteAreaId = area._id
     },
+    // 关闭删除场地弹框
     closeDeleteDialog () {
       this.deleteDialogConfig.status = false
+    },
+    // 打开修改场地状态弹框
+    openChangeStatusDialog (area) {
+      this.changeStatusDialogConfig.status = true
+      // 修改弹框配置
+      this.changeStatusDialogConfig.changeAreaId = area._id
+      this.changeStatusDialogConfig.content = `当前场地状态为${area.areaStatus}，你确定要修改场地状态为${area.areaStatus === '可用' ? '不可用' : '可用'}吗？`
+      this.changeStatusDialogConfig.changeStatus = area.areaStatus === '可用' ? '0' : '1'
+    },
+    // 关闭修改场地状态弹框
+    closeChangeStatusDialog () {
+      this.changeStatusDialogConfig.status = false
     }
   },
   watch: {

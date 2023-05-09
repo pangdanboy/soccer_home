@@ -21,9 +21,9 @@ const match = {
     type: String,
     require: true
   },
-  // 比赛场地
-  matchArea: {
-    type: String,
+  // 比赛场地Id
+  matchAreaId: {
+    type: mongoose.Types.ObjectId,
     require: true
   },
   // 比赛类型

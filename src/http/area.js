@@ -19,3 +19,33 @@ export const queryArea = (params) => {
     })
   })
 }
+
+export const changeStatus = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/area/changeStatus', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const deleteArea = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/area/deleteArea', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const editArea = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/area/editArea', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}

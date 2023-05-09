@@ -59,9 +59,11 @@
             </div>
             <div class="match-area">
               <v-select
-                v-model="editMatchData.matchArea"
+                v-model="editMatchData.matchAreaId"
                 :rules="formRules.matchAreaRules"
                 :items="areaList"
+                item-value="_id"
+                item-text="areaName"
                 label="比赛场地"
                 outlined dense
                 clearable
@@ -162,7 +164,7 @@
 <script>
 import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME, CLASS_TIME_PARAMS_MAP } from '@/constant'
 import { mapMutations } from 'vuex'
-import { createMatch, editMatch, getMatchById } from '@/http/match'
+import { createMatch, editMatch, getMatchById, getFreeArea } from '@/http/match'
 import { getUserByIds, getUserByInput } from '@/http/user'
 import detail from '@/components/detail'
 
@@ -190,7 +192,7 @@ export default {
       // 比赛时间
       matchClassTime: '',
       // 比赛场地
-      matchArea: '',
+      matchAreaId: '',
       // 比赛描述
       matchDescription: '',
       // 比赛类型
@@ -203,7 +205,7 @@ export default {
     // 根据用户输入搜索的参赛人员列表
     searchGamerList: [],
     // 比赛场地待选项，查询获取
-    areaList: ['中区足球场1', '中区足球场2', '中区足球场3'],
+    areaList: [],
     // 比赛课程时间待选项
     matchTimeSelectList: ['第一讲', '第二讲', '第三讲', '第四讲', '第五讲', '第六讲'],
     formRules: {
@@ -238,6 +240,24 @@ export default {
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
+    getFreeAreaList () {
+      getFreeArea({
+        matchDate: this.editMatchData.matchDate,
+        matchClassTime: CLASS_TIME[this.editMatchData.matchClassTime]
+      }).then(res => {
+        console.log(res)
+        if (res.success) {
+          res.data.forEach(area => {
+            const areaListItem = {}
+            areaListItem._id = area._id
+            areaListItem.areaName = area.areaName
+            this.areaList.push(areaListItem)
+          })
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
     createOrEditMatch () {
       // 表单校验
       if (!this.$refs.matchForm.validate()) return
@@ -313,15 +333,16 @@ export default {
       getMatchById({ matchId: matchId }).then(res => {
         if (res.success) {
           console.log(res)
+          this.areaList.push(res.data.area)
           // 初始化表单编辑比赛信息
-          this.editMatchData.matchName = res.data.matchName
-          this.editMatchData.matchDate = res.data.matchDate.split('T')[0]
-          this.editMatchData.matchClassTime = CLASS_TIME_PARAMS_MAP[res.data.matchClassTime].name
-          this.editMatchData.matchArea = res.data.matchArea
-          this.editMatchData.matchType = res.data.matchType
-          this.editMatchData.matchGamerList = res.data.matchGamerList
-          this.editMatchData.matchDescription = res.data.matchDescription
-          if (res.data.matchGamerList.length === 0) return
+          this.editMatchData.matchName = res.data.match.matchName
+          this.editMatchData.matchDate = res.data.match.matchDate.split('T')[0]
+          this.editMatchData.matchClassTime = CLASS_TIME_PARAMS_MAP[res.data.match.matchClassTime].name
+          this.editMatchData.matchAreaId = res.data.match.matchAreaId
+          this.editMatchData.matchType = res.data.match.matchType
+          this.editMatchData.matchGamerList = res.data.match.matchGamerList
+          this.editMatchData.matchDescription = res.data.match.matchDescription
+          if (res.data.match.matchGamerList.length === 0) return
           // 查询所有参赛者信息，初始化下拉框数据
           getUserByIds({ userIds: this.editMatchData.matchGamerList }).then(userInfoList => {
             this.searchGamerList = userInfoList.data
@@ -338,6 +359,20 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    }
+  },
+  watch: {
+    'editMatchData.matchDate': function () {
+      if (this.editMatchData.matchClassTime) {
+        this.areaList = []
+        this.getFreeAreaList()
+      }
+    },
+    'editMatchData.matchClassTime': function () {
+      if (this.editMatchData.matchDate) {
+        this.areaList = []
+        this.getFreeAreaList()
+      }
     }
   }
 }

@@ -8,10 +8,10 @@
               mdi-soccer-field
             </v-icon>
             <p style="margin: 0; font-size: 14px; font-weight: bold;">
-              比赛场地：{{ matchInfo.matchArea }}
+              比赛场地：{{ areaInfo.areaName }}
             </p>
           </v-chip>
-          <v-img src="./../../../static/images/home.jpg"></v-img>
+          <v-img :src="areaInfo.areaCover"></v-img>
         </div>
         <div class="match-info">
           <v-chip class="ma-2" color="primary">
@@ -121,6 +121,8 @@ export default {
     },
     // 赛事信息
     matchInfo: {},
+    // 场地信息
+    areaInfo: {},
     // 赛事参加人员信息，根据matchInfo中的参赛人员列表查询获得
     matchGamerInfo: [],
     // 二次确认弹框配置
@@ -146,7 +148,8 @@ export default {
       getMatchById({ matchId: matchId }).then(res => {
         console.log(res)
         if (res.success) {
-          this.matchInfo = res.data
+          this.matchInfo = res.data.match
+          this.areaInfo = res.data.area
           // 查询所有参赛者信息，初始化下拉框数据
           getUserByIds({ userIds: this.matchInfo.matchGamerList }).then(userInfoList => {
             this.matchGamerInfo = userInfoList.data

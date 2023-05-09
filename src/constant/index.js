@@ -65,7 +65,7 @@ const CLASS_TIME_PARAMS_MAP = {
   }
 }
 // 不显示导航栏的页面
-const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'page401', 'pageMatch', 'pageMatchDetail', 'overview', 'matchManage', 'areaManage', 'userManage', 'authManage']
+const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'page401', 'pageMatch', 'pageMatchDetail', 'overview', 'matchManage', 'areaManage', 'userManage', 'authManage', 'communityManage']
 // 用户信息编辑类型
 const EDIT_TYPE = {
   // 基础信息编辑(用户名||个性签名)
