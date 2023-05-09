@@ -1,5 +1,7 @@
 // const { Match } = require('./db/mongoose/models/match')
-
+// 在头部引入即可
+const fs = require('fs')
+const path = require('path')
 // 发送邮件的node插件
 const nodemailer = require('nodemailer')
 /**
@@ -123,9 +125,41 @@ function verifyUserRole (userRole, targetRole) {
 function sendSystemNoticeToUser (matchChange, users, type) {
 }
 
+// file 图片文件
+// sign 标识（用户唯一id、其他唯一值皆可）
+function saveImg (file, sign) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(file.path, async (err, data) => {
+      if (err) {
+        reject(err)
+      }
+      // 拓展名
+      const extName = file.mimetype.split('/')[1]
+      // 拼接成图片名
+      const imgName = `${sign}-${Date.now()}.${extName}`
+      // 写入图片
+      await fs.writeFile(path.join(__dirname, `../public/areaCover/${imgName}`), data, err => {
+        if (err) reject(err)
+      })
+      // 删除二进制文件
+      await fs.unlink(file.path, err => {
+        if (err) reject(err)
+        const serverUrl = 'http://localhost:5000'
+        // 成功就返回图片相对地址
+        resolve(`${serverUrl}/public/areaCover/${imgName}`)
+      })
+      // // 验证是否存入
+      // await fs.stat(path.join(__dirname, `../public/areaCover/${imgName}`), err => {
+      //   if (err) reject(err)
+      // })
+    })
+  })
+}
+
 module.exports = {
   sendEmail,
   random,
   verifyUserRole,
-  sendSystemNoticeToUser
+  sendSystemNoticeToUser,
+  saveImg
 }

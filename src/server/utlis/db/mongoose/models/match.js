@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 const mongoosePaginate = require('mongoose-paginate-v2')
 const match = {
-  // 创建比赛用户id
+  // 创建比赛用户id，指定为ObjectId类型与用户_id匹配
   createMatchUserId: {
-    type: String,
+    type: mongoose.Types.ObjectId,
     require: true
   },
   // 比赛名称
@@ -55,7 +55,7 @@ const match = {
 }
 const matchSchema = new mongoose.Schema(match, { minimize: false })
 matchSchema.plugin(mongoosePaginate)
-const Match = mongoose.model('freeTimeList', matchSchema, 'match')
+const Match = mongoose.model('match', matchSchema, 'match')
 module.exports = {
   Match
 }

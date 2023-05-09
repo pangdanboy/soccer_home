@@ -2,7 +2,7 @@
   <div id="area_manage">
     <detail :detail-config="detailConfig">
       <template #content>
-        <filter-header :filter-config="filterConfig" @getDataList="getAreaList" @addArea="addArea"></filter-header>
+        <filter-header :filter-config="filterConfig" @getDataList="getAreaList" @addArea="openAddAreaDialog"></filter-header>
         <v-data-table
           :headers="areaListHeaders"
           :items="areaList"
@@ -51,9 +51,65 @@
     <!-- 删除场地二次确认弹框 -->
     <common-dialog :dialog-config="deleteDialogConfig" @close="closeDeleteDialog" @delete="deleteArea"></common-dialog>
     <!-- 添加场地弹框 -->
-    <v-dialog v-model="addAreaDialogConfig.status">
+    <v-dialog v-model="addAreaDialogConfig.status" width="60%">
       <v-card>
         <v-card-title>{{ addAreaDialogConfig.title }}</v-card-title>
+        <v-card-subtitle>{{ addAreaDialogConfig.subTitle }}</v-card-subtitle>
+        <v-card-text>
+          <v-form ref="areaForm">
+            <div class="area-name">
+              <v-text-field
+                v-model="addAreaDialogConfig.data.areaName.value"
+                :rules="addAreaDialogConfig.formRules.areaNameRules"
+                :label="addAreaDialogConfig.data.areaName.label"
+                :counter="16"
+                outlined dense
+                required
+                clearable
+                prepend-icon="mdi-application-edit-outline"
+              ></v-text-field>
+            </div>
+            <div class="area-position">
+              <v-text-field
+                v-model="addAreaDialogConfig.data.areaPosition.value"
+                :rules="addAreaDialogConfig.formRules.areaPositionRules"
+                :label="addAreaDialogConfig.data.areaPosition.label"
+                :counter="64"
+                outlined dense
+                required
+                clearable
+                prepend-icon="mdi-application-edit-outline"
+              ></v-text-field>
+            </div>
+            <div class="area-status">
+              <v-select
+                v-model="addAreaDialogConfig.data.areaStatus.value"
+                :rules="addAreaDialogConfig.formRules.areaStatusRules"
+                :items="addAreaDialogConfig.data.areaStatus.options"
+                :label="addAreaDialogConfig.data.areaStatus.label"
+                outlined dense
+                clearable
+                prepend-icon="mdi-format-list-bulleted-type"
+              ></v-select>
+            </div>
+            <div class="area-cover">
+              <v-file-input
+                v-model="addAreaDialogConfig.data.areaCover.value"
+                :label="addAreaDialogConfig.data.areaCover.label"
+                :rules="addAreaDialogConfig.formRules.areaCoverRules"
+                @change="upload"
+                accept=".jpg,.png,.jpeg"
+                outlined
+                chips
+                dense
+                show-size
+              ></v-file-input>
+            </div>
+          </v-form>
+        </v-card-text>
+        <v-card-actions style="padding-top: 0; display: flex; align-items: center; justify-content: flex-end">
+          <v-btn @click="addArea">添加</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -64,7 +120,9 @@ import detail from '@/components/detail'
 import filterHeader from '@/components/filterHeader'
 // import { CLASS_TIME_PARAMS_MAP, MATCH_TYPE, MATCH_TYPE_PARAMS, MATCH_TYPE_PARAMS_MAP } from '@/constant'
 import commonDialog from '@/components/commonDialog'
-// import { mapMutations } from 'vuex'
+import { uploadAreaCover } from '@/http/upload'
+import { addArea, queryArea } from '@/http/area'
+import { mapMutations } from 'vuex'
 export default {
   name: 'areaManage',
   components: {
@@ -81,7 +139,7 @@ export default {
     areaListHeaders: [
       { text: '场地名称', value: 'areaName' },
       { text: '场地位置', value: 'areaPosition' },
-      { text: '场地状态', value: 'areaMatch' },
+      { text: '场地状态', value: 'areaStatus' },
       { text: '操作', value: 'operate' }
     ],
     // 比赛表格配置信息
@@ -136,22 +194,118 @@ export default {
     addAreaDialogConfig: {
       status: false,
       title: '添加场地',
+      subTitle: '场地多多，比赛多多',
       type: 'add',
       // 场地信息
       data: {
-        areaName: '',
-        areaPosition: '',
-        areaStatus: '',
-        areaCover: ''
+        areaName: {
+          value: '',
+          label: '场地名称'
+        },
+        areaPosition: {
+          value: '',
+          label: '场地位置'
+        },
+        areaStatus: {
+          value: '',
+          label: '场地状态',
+          options: ['可用', '不可用']
+        },
+        areaCover: {
+          value: null,
+          uploadUrl: '',
+          label: '场地图像'
+        }
       },
       // 表单规则
-      formRules: []
+      formRules: {
+        areaNameRules: [
+          v => !!v || '场地名称不能为空！',
+          v => v.length <= 16 || '长度不能超过16！'
+        ],
+        areaPositionRules: [
+          v => !!v || '场地位置不能为空！',
+          v => v.length <= 64 || '长度不能超过64！'
+        ],
+        areaCoverRules: [
+          v => !v || v.size < 2000000 || '图片大小不能超过2M'
+        ],
+        areaStatusRules: [
+          v => !!v || '场地状态不能为空！'
+        ]
+      }
     }
   }),
+  mounted () {
+    this.getAreaList()
+  },
   methods: {
-    getAreaList () {},
-    addArea () {
+    ...mapMutations(['OPEN_MESSAGE']),
+    getAreaList (page) {
+      const query = {}
+      if (page) {
+        query.page = this.areaListOptions.page
+      } else {
+        query.page = this.areaListOptions.page
+      }
+      query.limit = this.areaListOptions.itemsPerPage
+      this.filterConfig.filterList.forEach((item) => {
+        if (item.type !== 'button') query[item.key] = item.value
+      })
+      queryArea(query).then(res => {
+        console.log(res)
+        if (res.success) {
+          this.areaList = res.data
+          this.areaTotalCount = res.count
+          this.handlerAreaData()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    handlerAreaData () {
+      this.areaList.forEach(item => {
+        item.areaStatus = item.areaStatus === '1' ? '可用' : '不可用'
+      })
+    },
+    openAddAreaDialog () {
       this.addAreaDialogConfig.status = true
+    },
+    // 图片上传
+    upload () {
+      if (!this.$refs.areaForm.validate()) return
+      const formData = new FormData()
+      formData.append('file', this.addAreaDialogConfig.data.areaCover.value)
+      uploadAreaCover(formData).then(res => {
+        console.log(res.data)
+        // 图片上传成功，保存图片地址
+        this.addAreaDialogConfig.data.areaCover.uploadUrl = res.data.imgUrl
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    // 添加比赛场地
+    addArea () {
+      if (!this.$refs.areaForm.validate()) return
+      const params = {
+        areaName: this.addAreaDialogConfig.data.areaName.value,
+        areaPosition: this.addAreaDialogConfig.data.areaPosition.value,
+        areaStatus: this.addAreaDialogConfig.data.areaStatus.value === '可用' ? '1' : '0',
+        areaCover: this.addAreaDialogConfig.data.areaCover.uploadUrl
+      }
+      addArea(params).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) {
+          this.addAreaDialogConfig.status = false
+          this.getAreaList(1)
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     },
     checkAreaDetail () {},
     editArea () {},
@@ -162,6 +316,14 @@ export default {
     },
     closeDeleteDialog () {
       this.deleteDialogConfig.status = false
+    }
+  },
+  watch: {
+    areaListOptions: {
+      handler () {
+        this.getAreaList()
+      },
+      deep: true
     }
   }
 }

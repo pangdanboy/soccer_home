@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const { Match } = require('./../../utlis/db/mongoose/models/match')
-const { commonThrow } = require('../../utlis/throw')
+// const { User } = require('./../../utlis/db/mongoose/models/user')
+const { commonThrow, authThrow } = require('../../utlis/throw')
 const { verifyUserRole } = require('./../../utlis/tools')
 const { USER_PERMISSIONS } = require('./../../global/config')
 
@@ -16,7 +17,7 @@ router.post('/create', passport.authenticate('jwt', { session: false }), (req, r
   // }
   // 创建比赛
   const newMatch = new Match({
-    createMatchUserId: req.body.userId,
+    createMatchUserId: req.user._id,
     matchName: req.body.matchName,
     matchDate: req.body.matchDate,
     matchClassTime: req.body.matchClassTime,
@@ -267,6 +268,43 @@ router.post('/getMatchByDateAndTime', (req, res) => {
       code: 200,
       count: matchList.totalDocs,
       data: matchList.docs,
+      message: '查询成功',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 导出赛事信息
+ */
+router.get('/export', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userRole = req.user.role
+  if (!verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    return authThrow(res)
+  }
+  Match.aggregate([
+    {
+      $lookup: [
+        {
+          from: 'user',
+          localField: 'createMatchUserId',
+          foreignField: '_id',
+          as: 'userInfo'
+        },
+        {
+          from: 'area',
+          localField: 'areaId',
+          foreignField: '_id',
+          as: 'areaInfo'
+        }
+      ]
+    }
+  ], { _id: 0, _v: 0 }).then(matchList => {
+    return res.json({
+      code: 200,
+      data: matchList,
       message: '查询成功',
       success: true
     })
