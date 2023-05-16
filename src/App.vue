@@ -9,7 +9,7 @@
             <img src="./static/images/logo.jpg" alt="">
           </v-avatar>
           <!-- 标题 -->
-          <v-toolbar-title>足球小窝</v-toolbar-title>
+          <v-toolbar-title>五人制足球比赛系统</v-toolbar-title>
           <v-spacer></v-spacer>
           <!-- 路由入口，消息中心、用户中心、登出、创建比赛、以及管理员入口 -->
           <router-link to="/pageMessageCenter" tag="span">
@@ -70,7 +70,6 @@
         <template v-slot:extension>
           <v-tabs align-with-title>
             <v-tab to="/pageHome">赛事中心</v-tab>
-            <v-tab to="/pageCommunity">社区</v-tab>
           </v-tabs>
         </template>
       </v-app-bar>

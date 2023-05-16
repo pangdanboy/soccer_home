@@ -38,12 +38,12 @@
         :counter="16"
         type="password"
       ></v-text-field>
-      <v-text-field
-        v-model="secretKey"
-        label="管理员密钥(选填)"
-        clearable
-        :counter="6"
-      ></v-text-field>
+<!--      <v-text-field-->
+<!--        v-model="secretKey"-->
+<!--        label="管理员密钥(选填)"-->
+<!--        clearable-->
+<!--        :counter="6"-->
+<!--      ></v-text-field>-->
       <div class="register-policy">
         <v-checkbox
           v-model="checkbox"

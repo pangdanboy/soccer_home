@@ -26,37 +26,37 @@
           <v-list-item-group dense>
             <v-list-item link to="/pageAdmin" exact>
               <v-list-item-icon>
-                <v-icon>mdi-folder</v-icon>
+                <v-icon>mdi-home-analytics</v-icon>
               </v-list-item-icon>
               <v-list-item-title>服务总览</v-list-item-title>
             </v-list-item>
             <v-list-item link to="/pageAdmin/matchManage">
               <v-list-item-icon>
-                <v-icon>mdi-folder</v-icon>
+                <v-icon>mdi-soccer</v-icon>
               </v-list-item-icon>
               <v-list-item-title>比赛管理</v-list-item-title>
             </v-list-item>
             <v-list-item link to="/pageAdmin/areaManage">
               <v-list-item-icon>
-                <v-icon>mdi-account-multiple</v-icon>
+                <v-icon>mdi-soccer-field</v-icon>
               </v-list-item-icon>
               <v-list-item-title>场地管理</v-list-item-title>
             </v-list-item>
             <v-list-item link to="/pageAdmin/userManage">
               <v-list-item-icon>
-                <v-icon>mdi-star</v-icon>
+                <v-icon>mdi-account-group</v-icon>
               </v-list-item-icon>
               <v-list-item-title>用户管理</v-list-item-title>
             </v-list-item>
-            <v-list-item link to="/pageAdmin/communityManage">
-              <v-list-item-icon>
-                <v-icon>mdi-star</v-icon>
-              </v-list-item-icon>
-              <v-list-item-title>社区管理</v-list-item-title>
-            </v-list-item>
+<!--            <v-list-item link to="/pageAdmin/communityManage">-->
+<!--              <v-list-item-icon>-->
+<!--                <v-icon>mdi-star</v-icon>-->
+<!--              </v-list-item-icon>-->
+<!--              <v-list-item-title>社区管理</v-list-item-title>-->
+<!--            </v-list-item>-->
             <v-list-item link to="/pageHome">
               <v-list-item-icon>
-                <v-icon>mdi-star</v-icon>
+                <v-icon>mdi-reply-all-outline</v-icon>
               </v-list-item-icon>
               <v-list-item-title>返回首页</v-list-item-title>
             </v-list-item>
