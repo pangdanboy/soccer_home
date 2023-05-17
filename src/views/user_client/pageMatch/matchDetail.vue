@@ -11,6 +11,14 @@
               比赛场地：{{ areaInfo.areaName }}
             </p>
           </v-chip>
+          <v-chip class="ma-2" color="primary">
+            <v-icon left>
+              mdi-map-marker-radius-outline
+            </v-icon>
+            <p style="margin: 0; font-size: 14px; font-weight: bold;">
+              场地位置：{{ areaInfo.areaPosition }}
+            </p>
+          </v-chip>
           <v-img :src="areaInfo.areaCover"></v-img>
         </div>
         <div class="match-info">

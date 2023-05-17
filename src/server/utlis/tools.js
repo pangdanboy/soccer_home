@@ -1,7 +1,9 @@
-// const { Match } = require('./db/mongoose/models/match')
-// 在头部引入即可
+// 文件、路径模块
 const fs = require('fs')
 const path = require('path')
+const { Message } = require('./db/mongoose/models/message')
+const { Match } = require('./db/mongoose/models/match')
+const { MATCH_CHANGE_COLUMN, MATCH_CHANGE_COLUMN_STR } = require('../global/config')
 // 发送邮件的node插件
 const nodemailer = require('nodemailer')
 /**
@@ -117,12 +119,44 @@ function verifyUserRole (userRole, targetRole) {
 }
 
 /**
- * 向用户发送系统通知
- * @param matchChange 比赛变化: {matchId: '', change: ''}
- * @param users 接收通知的用户id数组
- * @param type 通知类型：比赛信息变更(change)、比赛删除(delete)
+ * 比赛信息发生变化，向比赛参赛用户发送消息通知(存储)
+ * @param changeType 变动类型 编辑(edit)or删除(delete)
+ * @param updateColumn 变动字段
+ * @param updateMatchId 变动比赛id
  */
-function sendSystemNoticeToUser (matchChange, users, type) {
+function sendSystemNoticeToUser (changeType, updateColumn, updateMatchId) {
+  // 操作类型
+  const operateType = changeType === 'edit' ? '编辑' : '删除'
+  // 构造系统通知消息结构
+  Match.findOne({ _id: updateMatchId }).then(match => {
+    const message = {}
+    message.messageType = operateType
+    if (changeType === 'edit') {
+      const changeColumn = []
+      // 对比哪个字段发生了变化
+      Object.keys(MATCH_CHANGE_COLUMN).forEach(column => {
+        if (match[MATCH_CHANGE_COLUMN[column]] !== updateColumn[MATCH_CHANGE_COLUMN[column]]) {
+          changeColumn.push(MATCH_CHANGE_COLUMN_STR[MATCH_CHANGE_COLUMN[column]])
+        }
+      })
+      message.matchName = updateColumn.matchName
+      message.matchDate = updateColumn.matchDate
+      message.changeColumn = changeColumn.join(',')
+    } else {
+      message.matchName = match.matchName
+      message.matchDate = match.matchDate
+      message.changeColumn = ''
+    }
+    match.matchGamerList.forEach(userId => {
+      message.userId = userId
+      const newMessage = new Message(message)
+      newMessage.save().then(res => {
+        console.log(res)
+      }).catch(err => {
+        console.log(err)
+      })
+    })
+  })
 }
 
 // file 图片文件

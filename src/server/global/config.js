@@ -57,6 +57,21 @@ const DATE = {
   6: '周六',
   7: '周日'
 }
+// 这些比赛字段变动之后，将向参赛用户发送系统通知
+const MATCH_CHANGE_COLUMN = {
+  MATCH_TYPE: 'matchType',
+  MATCH_DATE: 'matchDate',
+  MATCH_CLASS_TIME: 'matchClassTime',
+  MATCH_AREA: 'matchArea'
+}
+
+// 这些比赛字段中文
+const MATCH_CHANGE_COLUMN_STR = {
+  [MATCH_CHANGE_COLUMN.MATCH_TYPE]: '比赛类型',
+  [MATCH_CHANGE_COLUMN.MATCH_DATE]: '比赛日期',
+  [MATCH_CHANGE_COLUMN.MATCH_CLASS_TIME]: '比赛时间',
+  [MATCH_CHANGE_COLUMN.MATCH_AREA]: '比赛场地'
+}
 
 const secretOrKey = 'secret'
 module.exports = {
@@ -66,5 +81,7 @@ module.exports = {
   userAvatar,
   routes,
   USER_PERMISSIONS,
-  DATE
+  DATE,
+  MATCH_CHANGE_COLUMN,
+  MATCH_CHANGE_COLUMN_STR
 }

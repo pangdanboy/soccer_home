@@ -4,7 +4,7 @@ const passport = require('passport')
 const { Match } = require('./../../utlis/db/mongoose/models/match')
 const { Area } = require('./../../utlis/db/mongoose/models/area')
 const { commonThrow, authThrow } = require('../../utlis/throw')
-const { verifyUserRole } = require('./../../utlis/tools')
+const { verifyUserRole, sendSystemNoticeToUser } = require('./../../utlis/tools')
 const { USER_PERMISSIONS } = require('./../../global/config')
 
 /**
@@ -45,6 +45,7 @@ router.post('/create', passport.authenticate('jwt', { session: false }), (req, r
 router.post('/editMatch', passport.authenticate('jwt', { session: false }), (req, res) => {
   const editMatchId = req.body.matchId
   const editUserId = req.user._id.toString()
+  const userRole = req.user.role
   const updateColumn = {
     matchName: req.body.matchName,
     matchDate: req.body.matchDate,
@@ -55,8 +56,17 @@ router.post('/editMatch', passport.authenticate('jwt', { session: false }), (req
     matchGamerList: req.body.matchGamerList,
     updateTime: Date.now()
   }
+  // 发送系统通知告知用户比赛信息发生变化
+  sendSystemNoticeToUser('edit', updateColumn, editMatchId)
+  let query = {}
+  // 如果用户角色为超级管理员，则无需校验比赛是否用户创建
+  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    query = { _id: editMatchId }
+  } else {
+    query = { $and: [{ _id: editMatchId }, { createMatchUserId: editUserId }] }
+  }
   // 匹配编辑用户是否为编辑的比赛的创建者，如果是才更新该比赛信息
-  Match.updateOne({ $and: [{ _id: editMatchId }, { createMatchUserId: editUserId }] }, updateColumn).then(match => {
+  Match.updateOne(query, updateColumn).then(match => {
     return res.json({
       code: 200,
       data: {},
@@ -235,8 +245,7 @@ router.post('/deleteMatch', passport.authenticate('jwt', { session: false }), (r
 router.get('/getMatchById', (req, res) => {
   const matchId = req.query.matchId
   Match.findOne({ _id: matchId }).then(match => {
-    Area.findOne({ _id: match.matchAreaId }, { _id: 1, areaName: 1, areaCover: 1 }).then(area => {
-      console.log(area)
+    Area.findOne({ _id: match.matchAreaId }, { _id: 1, areaName: 1, areaCover: 1, areaPosition: 1 }).then(area => {
       return res.json({
         code: 200,
         data: {
