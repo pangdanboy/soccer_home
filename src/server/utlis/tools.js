@@ -125,36 +125,60 @@ function verifyUserRole (userRole, targetRole) {
  * @param updateMatchId 变动比赛id
  */
 function sendSystemNoticeToUser (changeType, updateColumn, updateMatchId) {
-  // 操作类型
-  const operateType = changeType === 'edit' ? '编辑' : '删除'
-  // 构造系统通知消息结构
-  Match.findOne({ _id: updateMatchId }).then(match => {
-    const message = {}
-    message.messageType = operateType
-    if (changeType === 'edit') {
-      const changeColumn = []
-      // 对比哪个字段发生了变化
-      Object.keys(MATCH_CHANGE_COLUMN).forEach(column => {
-        if (match[MATCH_CHANGE_COLUMN[column]] !== updateColumn[MATCH_CHANGE_COLUMN[column]]) {
-          changeColumn.push(MATCH_CHANGE_COLUMN_STR[MATCH_CHANGE_COLUMN[column]])
-        }
+  return new Promise((resolve, reject) => {
+    // 操作类型
+    const operateType = changeType === 'edit' ? '编辑' : '删除'
+    Match.findOne({ _id: updateMatchId }).lean().then(match => {
+      // 构造系统通知消息结构
+      const message = {}
+      message.messageType = operateType
+      if (changeType === 'edit') {
+        const changeColumn = []
+        // 比赛日期和比赛场地id转换为字符串
+        match.matchDate = new Date(match.matchDate).toString()
+        updateColumn.matchDate = new Date(updateColumn.matchDate).toString()
+        match.matchAreaId = match.matchAreaId.toString()
+        // 对比哪个字段发生了变化
+        Object.keys(MATCH_CHANGE_COLUMN).forEach(column => {
+          if (match[MATCH_CHANGE_COLUMN[column]] !== updateColumn[MATCH_CHANGE_COLUMN[column]]) {
+            changeColumn.push(MATCH_CHANGE_COLUMN_STR[MATCH_CHANGE_COLUMN[column]])
+          }
+        })
+        // 保存比赛的最新信息
+        message.matchName = updateColumn.matchName
+        message.matchDate = updateColumn.matchDate
+        message.matchId = match._id
+        message.changeColumn = changeColumn.join(',')
+      } else {
+        // 保存比赛删除前的信息
+        message.matchName = match.matchName
+        message.matchDate = match.matchDate
+        // 比赛删除之后id为空
+        message.matchId = ''
+        message.changeColumn = ''
+      }
+      // 为比赛的参与用户发送消息通知
+      match.matchGamerList.forEach(userId => {
+        message.userId = userId
+        const newMessage = new Message(message)
+        newMessage.save().then(res => {
+          // 如果操作为删除
+          if (changeType === 'delete') {
+            // 需要将关于该比赛的消息通知都删除
+            Message.deleteMany({ matchId: match._id }).then(delres => {
+              resolve(true)
+            }).catch(err => {
+              reject(err)
+            })
+          }
+          resolve(true)
+        }).catch(err => {
+          console.log(err)
+          reject(err)
+        })
       })
-      message.matchName = updateColumn.matchName
-      message.matchDate = updateColumn.matchDate
-      message.changeColumn = changeColumn.join(',')
-    } else {
-      message.matchName = match.matchName
-      message.matchDate = match.matchDate
-      message.changeColumn = ''
-    }
-    match.matchGamerList.forEach(userId => {
-      message.userId = userId
-      const newMessage = new Message(message)
-      newMessage.save().then(res => {
-        console.log(res)
-      }).catch(err => {
-        console.log(err)
-      })
+    }).catch(err => {
+      reject(err)
     })
   })
 }

@@ -4,10 +4,20 @@ const USER_PERMISSIONS = {
   ADMIN: '1',
   COMMON_USER: '0'
 }
+const USER_PERMISSIONS_TEXT = {
+  SUPER_ADMIN: '超级管理员',
+  ADMIN: '管理员',
+  COMMON_USER: '普通用户'
+}
 const USER_LEVEL = {
   [USER_PERMISSIONS.COMMON_USER]: '普通用户',
   [USER_PERMISSIONS.ADMIN]: '管理员',
   [USER_PERMISSIONS.SUPER_ADMIN]: '超级管理员'
+}
+const USER_LEVEL_PARAMS_MAP = {
+  [USER_PERMISSIONS_TEXT.SUPER_ADMIN]: USER_PERMISSIONS.SUPER_ADMIN,
+  [USER_PERMISSIONS_TEXT.ADMIN]: USER_PERMISSIONS.ADMIN,
+  [USER_PERMISSIONS_TEXT.COMMON_USER]: USER_PERMISSIONS.COMMON_USER
 }
 // 日期
 const DATE = {
@@ -65,7 +75,7 @@ const CLASS_TIME_PARAMS_MAP = {
   }
 }
 // 不显示导航栏的页面
-const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'page401', 'pageMatch', 'pageMatchDetail', 'overview', 'matchManage', 'areaManage', 'userManage', 'authManage', 'communityManage']
+const NOT_SHOW_NAV_PAGES = ['pageLogin', 'pageMessageCenter', 'pageUserCenter', 'page401', 'page404', 'pageMatch', 'pageMatchDetail', 'overview', 'matchManage', 'areaManage', 'userManage', 'authManage', 'communityManage']
 // 用户信息编辑类型
 const EDIT_TYPE = {
   // 基础信息编辑(用户名||个性签名)
@@ -105,6 +115,7 @@ const MATCH_TYPE_PARAMS = {
 
 export {
   USER_PERMISSIONS,
+  USER_PERMISSIONS_TEXT,
   DATE,
   NOT_SHOW_NAV_PAGES,
   EDIT_TYPE,
@@ -113,5 +124,6 @@ export {
   MATCH_TYPE_PARAMS_MAP,
   USER_LEVEL,
   CLASS_TIME,
-  CLASS_TIME_PARAMS_MAP
+  CLASS_TIME_PARAMS_MAP,
+  USER_LEVEL_PARAMS_MAP
 }

@@ -35,9 +35,15 @@ export default {
     // 页面类型，未登录(NoLogin)or没有权限(NoAuth)
     type: ''
   }),
-  mounted () {
+  created () {
     console.log(this.$route.params)
     this.type = this.$route.params.type
+    // 如果用户已经登录，跳转首页
+    if (localStorage.getItem('userToken')) {
+      this.$router.push('/pageLogin')
+    }
+  },
+  computed: {
   },
   methods: {
   }

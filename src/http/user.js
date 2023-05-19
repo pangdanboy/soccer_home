@@ -17,6 +17,17 @@ export const register = (params) => {
     })
   })
 }
+
+export const queryUser = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/user/queryUser', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
 export const getCurrentUserInfo = (params) => {
   return new Promise((resolve, reject) => {
     axios.get('/user/current', { params }).then(res => {

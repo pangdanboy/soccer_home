@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import { verifyRole } from '@/http/premissions'
 // import { USER_PERMISSIONS } from '@/constant'
 
 Vue.use(VueRouter)
@@ -26,22 +27,6 @@ const routes = [
     }
   },
   {
-    path: '/pageNews',
-    name: 'pageNews',
-    component: () => import('../views/user_client/pageNews/index.vue'),
-    meta: {
-      isAuth: false
-    }
-  },
-  {
-    path: '/pageCommunity',
-    name: 'pageCommunity',
-    component: () => import('../views/user_client/pageCommunity/index.vue'),
-    meta: {
-      isAuth: false
-    }
-  },
-  {
     path: '/pageUserCenter',
     name: 'pageUserCenter',
     component: () => import('../views/user_client/pageUserCenter/index.vue'),
@@ -60,7 +45,10 @@ const routes = [
   {
     path: '/pageMatchDetail',
     name: 'pageMatchDetail',
-    component: () => import('../views/user_client/pageMatch/matchDetail')
+    component: () => import('../views/user_client/pageMatch/matchDetail'),
+    meta: {
+      isAuth: true
+    }
   },
   {
     path: '/pageMatch',
@@ -74,6 +62,14 @@ const routes = [
     path: '/page401/:type',
     name: 'page401',
     component: () => import('../views/401/index'),
+    meta: {
+      isAuth: false
+    }
+  },
+  {
+    path: '/page404',
+    name: 'page404',
+    component: () => import('../views/404/index'),
     meta: {
       isAuth: false
     }
@@ -138,14 +134,28 @@ const router = new VueRouter({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
+  // 如果进入未知页面，跳转到404页面
+  if (!to.name) {
+    router.replace('/page404')
+    return
+  }
+  // 判断用户进入页面是否需要鉴权
   if (to.meta.isAuth) {
     console.log('进入的路由需要进行用户鉴权')
     // 进行用户的权限校验，先判断用户是否登录，如果未登录，跳转到登录页
     if (!localStorage.getItem('userToken')) {
       router.push('/page401/NoLogin')
-    } else { // 用户登录之后，调用接口校验用户角色是否有权限进入该路由
-      // const userRole = localStorage.getItem('user_role')
-      next()
+    } else {
+      // 用户登录之后，调用接口校验用户角色是否有权限进入该路由
+      verifyRole({ viewRoute: to.name }).then(res => {
+        if (res.data.userIn) {
+          next()
+        } else {
+          router.push('/page401/NoAuth')
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     }
   } else if (to.name === 'pageLogin') {
     // 进入登录页，如果用户已经登录，跳转到主页

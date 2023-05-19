@@ -71,8 +71,6 @@ export default {
   data: () => ({
     // 比赛列表数据
     matchList: [],
-    // // 导出比赛数据
-    // exportMatchList: [],
     // 比赛总数
     matchTotalCount: 0,
     // 比赛数据表格的头

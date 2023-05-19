@@ -6,7 +6,12 @@ const message = {
     type: mongoose.Types.ObjectId,
     require: true
   },
-  // 比赛类型
+  // 比赛id
+  matchId: {
+    type: String,
+    require: false
+  },
+  // 消息类型
   messageType: {
     type: String,
     require: true
@@ -24,7 +29,7 @@ const message = {
   // 变动字段
   changeColumn: {
     type: String,
-    required: true
+    required: false
   },
   // 创建时间
   createTime: {

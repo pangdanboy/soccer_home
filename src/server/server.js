@@ -32,12 +32,16 @@ const match = require('./routes/api/match')
 const system = require('./routes/api/system')
 const upload = require('./routes/api/upload')
 const area = require('./routes/api/area')
+const message = require('./routes/api/message')
+const route = require('./routes/api/routeVerify')
 // 使用路由
 app.use('/api/user', user)
 app.use('/api/match', match)
 app.use('/api/system', system)
 app.use('/api/upload', upload)
 app.use('/api/area', area)
+app.use('/api/message', message)
+app.use('/api/route', route)
 
 // 开启请求监听
 app.listen(serverInfo.port, () => {

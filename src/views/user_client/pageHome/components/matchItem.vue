@@ -31,7 +31,6 @@
         <p class="match-date">
           比赛时间：{{ matchData.matchDate.split('T')[0] + '-' + CLASS_TIME_PARAMS_MAP[matchData.matchClassTime].name + '-' + CLASS_TIME_PARAMS_MAP[matchData.matchClassTime].time}}
         </p>
-        <p class="match-place">比赛地点：{{ matchData.matchArea }}</p>
         <p class="match-participants">
           当前参与人数：{{ matchData.matchGamerList.length }}
           <span>(剩余{{ 10 - matchData.matchGamerList.length }}个位置)</span>

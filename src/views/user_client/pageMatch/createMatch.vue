@@ -43,6 +43,7 @@
                   v-model="editMatchData.matchDate"
                   @input="matchDatePicker = false"
                   locale="zh-cn"
+                  :min="minDate"
                 ></v-date-picker>
               </v-menu>
             </div>
@@ -167,6 +168,7 @@ import { mapMutations } from 'vuex'
 import { createMatch, editMatch, getMatchById, getFreeArea } from '@/http/match'
 import { getUserByIds, getUserByInput } from '@/http/user'
 import detail from '@/components/detail'
+import moment from 'moment'
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
@@ -206,6 +208,10 @@ export default {
     searchGamerList: [],
     // 比赛场地待选项，查询获取
     areaList: [],
+    // 当前编辑比赛的场地信息
+    currentMatchArea: {},
+    // 比赛日期和时间变化次数
+    dateAndTimeChangeCount: 0,
     // 比赛课程时间待选项
     matchTimeSelectList: ['第一讲', '第二讲', '第三讲', '第四讲', '第五讲', '第六讲'],
     formRules: {
@@ -227,6 +233,7 @@ export default {
       ]
     },
     timeId: null,
+    minDate: moment(Date.now()).format('YYYY-MM-DD'),
     MATCH_TYPE,
     MATCH_TYPE_PARAMS
   }),
@@ -241,6 +248,10 @@ export default {
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
     getFreeAreaList () {
+      if (this.$route.query.matchId) {
+        // 将当前编辑比赛的场地信息保存在空闲场地列表中
+        this.areaList.push(this.currentMatchArea)
+      }
       getFreeArea({
         matchDate: this.editMatchData.matchDate,
         matchClassTime: CLASS_TIME[this.editMatchData.matchClassTime]
@@ -333,7 +344,8 @@ export default {
       getMatchById({ matchId: matchId }).then(res => {
         if (res.success) {
           console.log(res)
-          this.areaList.push(res.data.area)
+          // 保存当前编辑比赛场地信息
+          this.currentMatchArea = res.data.area
           // 初始化表单编辑比赛信息
           this.editMatchData.matchName = res.data.match.matchName
           this.editMatchData.matchDate = res.data.match.matchDate.split('T')[0]

@@ -4,9 +4,10 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 const { secretOrKey, userAvatar, serverInfo } = require('../../global/config')
 const passport = require('passport')
-const { commonThrow } = require('../../utlis/throw')
+const { commonThrow, authThrow } = require('../../utlis/throw')
 const { sendEmail, random } = require('../../utlis/tools')
-
+const { verifyUserRole } = require('./../../utlis/tools')
+const { USER_PERMISSIONS } = require('./../../global/config')
 const { User } = require('../../utlis/db/mongoose/models/user')
 
 /**
@@ -58,6 +59,75 @@ router.post('/register', (req, res) => {
   }).catch(err => {
     console.log(err)
     commonThrow(res, err)
+  })
+})
+
+/**
+ * 用户列表查询
+ */
+router.post('/queryUser', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userRole = req.user.role
+  // 校验用户角色是否为超级管理员
+  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    authThrow(res)
+    return
+  }
+  // 处理查询参数
+  const query = {
+    username: { $regex: req.body.username || '' }
+  }
+  if (req.body.userRole) query.role = req.body.userRole
+  // 分页查询配置
+  const options = {
+    page: req.body.page,
+    limit: req.body.limit,
+    sort: { _id: -1 },
+    lean: true
+  }
+  User.paginate(query, options).then(userList => {
+    return res.json({
+      code: 200,
+      count: userList.totalDocs,
+      data: userList.docs,
+      message: '查询成功',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
+})
+
+/**
+ * 重置用户密码
+ */
+router.post('/resetPassword', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userRole = req.user.role
+  // 校验用户角色是否为超级管理员
+  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    authThrow(res)
+    return
+  }
+  // 系统默认密码
+  const defaultPassword = '123456'
+  // 当前用户
+  const user = req.user
+  // 加密密码
+  // eslint-disable-next-line node/handle-callback-err
+  bcrypt.genSalt(10, function (err, salt) {
+    bcrypt.hash(defaultPassword, salt, function (err, hash) {
+      if (err) commonThrow(res, err)
+      user.password = hash
+      user.save().then(saveRes => {
+        return res.json({
+          code: 200,
+          data: {},
+          message: '重置成功！',
+          success: true
+        })
+      }).catch(saveError => {
+        commonThrow(res, saveError)
+      })
+    })
   })
 })
 

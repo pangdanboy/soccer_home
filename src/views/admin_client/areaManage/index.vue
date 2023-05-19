@@ -149,7 +149,7 @@ export default {
     areaListOptions: {},
     detailConfig: {
       className: 'area-manage',
-      icon: 'mdi-soccer',
+      icon: 'mdi-soccer-field',
       title: '场地管理',
       subTitle: '系统场地列表中心，可对所有场地进行管理统计'
     },

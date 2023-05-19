@@ -1,8 +1,8 @@
 import axios from './../plugins/axios'
 
-export const verifyRole = (params) => {
+export const queryMessage = (params) => {
   return new Promise((resolve, reject) => {
-    axios.post('/route/verifyRole', params).then(res => {
+    axios.post('/message/queryMessage', params).then(res => {
       resolve(res.data)
     }).catch(err => {
       reject(err)

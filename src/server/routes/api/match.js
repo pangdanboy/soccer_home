@@ -50,31 +50,34 @@ router.post('/editMatch', passport.authenticate('jwt', { session: false }), (req
     matchName: req.body.matchName,
     matchDate: req.body.matchDate,
     matchClassTime: req.body.matchClassTime,
-    matchArea: req.body.matchArea,
+    matchAreaId: req.body.matchAreaId,
     matchType: req.body.matchType,
     matchDescription: req.body.matchDescription,
     matchGamerList: req.body.matchGamerList,
     updateTime: Date.now()
   }
   // 发送系统通知告知用户比赛信息发生变化
-  sendSystemNoticeToUser('edit', updateColumn, editMatchId)
-  let query = {}
-  // 如果用户角色为超级管理员，则无需校验比赛是否用户创建
-  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
-    query = { _id: editMatchId }
-  } else {
-    query = { $and: [{ _id: editMatchId }, { createMatchUserId: editUserId }] }
-  }
-  // 匹配编辑用户是否为编辑的比赛的创建者，如果是才更新该比赛信息
-  Match.updateOne(query, updateColumn).then(match => {
-    return res.json({
-      code: 200,
-      data: {},
-      message: '更新成功！',
-      success: true
+  sendSystemNoticeToUser('edit', updateColumn, editMatchId).then(sendRes => {
+    let query = {}
+    // 如果用户角色为超级管理员，则无需校验比赛是否用户创建
+    if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+      query = { _id: editMatchId }
+    } else {
+      query = { $and: [{ _id: editMatchId }, { createMatchUserId: editUserId }] }
+    }
+    // 匹配编辑用户是否为编辑的比赛的创建者，如果是才更新该比赛信息
+    Match.updateOne(query, updateColumn).then(match => {
+      return res.json({
+        code: 200,
+        data: {},
+        message: '更新成功！',
+        success: true
+      })
+    }).catch(err => {
+      commonThrow(res, err)
     })
   }).catch(err => {
-    commonThrow(res, err)
+    console.log(err)
   })
 })
 
@@ -220,19 +223,23 @@ router.post('/deleteMatch', passport.authenticate('jwt', { session: false }), (r
   const userId = req.user._id.toString()
   const userRole = req.user.role
   let query = {}
-  // 如果用户角色为超级管理员，则无需校验比赛是否用户创建
-  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
-    query = { _id: deleteMatchId }
-  } else {
-    query = { $and: [{ _id: deleteMatchId }, { createMatchUserId: userId }] }
-  }
-  // 匹配删除用户是否为删除比赛的创建者，如果是才删除该比赛
-  Match.deleteOne(query).then(deleteRes => {
-    return res.json({
-      code: 200,
-      data: {},
-      message: '删除成功！',
-      success: true
+  sendSystemNoticeToUser('delete', {}, deleteMatchId).then(sendRes => {
+    // 如果用户角色为超级管理员，则无需校验比赛是否用户创建
+    if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+      query = { _id: deleteMatchId }
+    } else {
+      query = { $and: [{ _id: deleteMatchId }, { createMatchUserId: userId }] }
+    }
+    // 匹配删除用户是否为删除比赛的创建者，如果是才删除该比赛
+    Match.deleteOne(query).then(deleteRes => {
+      return res.json({
+        code: 200,
+        data: {},
+        message: '删除成功！',
+        success: true
+      })
+    }).catch(err => {
+      commonThrow(res, err)
     })
   }).catch(err => {
     commonThrow(res, err)

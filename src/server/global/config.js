@@ -28,24 +28,24 @@ const USER_PERMISSIONS = {
   COMMON_USER: '0'
 }
 // 通用访问路由(所有登录用户都可以访问的路由)
-const routes = ['pageHome', 'pageLogin', 'pageMessageCenter', 'pageNews', 'pageCommunity', 'pageUserCenter', 'overview']
+const commonRoutes = ['pageHome', 'pageLogin', 'pageMessageCenter', 'pageUserCenter', 'pageMatch', 'pageMatchDetail']
 // 用户角色权限访问路由限制
-// const userRoleToRoute = {
-//   SUPER_ADMIN: {
-//     // 前后端统一的匹配key值
-//     key: USER_PERMISSIONS.SUPER_ADMIN,
-//     // 用户可以访问的路由
-//     routes: [...commonRoutes, 'pageAdmin']
-//   },
-//   ADMIN: {
-//     key: USER_PERMISSIONS.ADMIN,
-//     routes: [...commonRoutes]
-//   },
-//   COMMON_USER: {
-//     key: USER_PERMISSIONS.COMMON_USER,
-//     routes: [...commonRoutes]
-//   }
-// }
+const USER_ROLE_ROUTES = {
+  SUPER_ADMIN: {
+    // 前后端统一的匹配key值
+    key: USER_PERMISSIONS.SUPER_ADMIN,
+    // 用户可以访问的路由
+    routes: [...commonRoutes, 'overview', 'matchManage', 'areaManage', 'userManage']
+  },
+  ADMIN: {
+    key: USER_PERMISSIONS.ADMIN,
+    routes: [...commonRoutes]
+  },
+  COMMON_USER: {
+    key: USER_PERMISSIONS.COMMON_USER,
+    routes: [...commonRoutes]
+  }
+}
 
 // 日期
 const DATE = {
@@ -62,7 +62,7 @@ const MATCH_CHANGE_COLUMN = {
   MATCH_TYPE: 'matchType',
   MATCH_DATE: 'matchDate',
   MATCH_CLASS_TIME: 'matchClassTime',
-  MATCH_AREA: 'matchArea'
+  MATCH_AREA: 'matchAreaId'
 }
 
 // 这些比赛字段中文
@@ -79,7 +79,7 @@ module.exports = {
   serverInfo,
   secretOrKey,
   userAvatar,
-  routes,
+  USER_ROLE_ROUTES,
   USER_PERMISSIONS,
   DATE,
   MATCH_CHANGE_COLUMN,

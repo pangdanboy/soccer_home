@@ -90,6 +90,7 @@
           color="primary"
           @click="openDialog('in')"
           v-show="!matchInfo.matchGamerList.includes($store.state.UserInfo.id)"
+          :disabled="matchInfo.matchGamerList.length >= 10"
         >参加比赛</v-btn>
         <v-btn
           color="error"

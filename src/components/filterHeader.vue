@@ -37,7 +37,7 @@
                   clearable
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="item.value" no-title scrollable range locale="zh-cn">
+              <v-date-picker v-model="item.value" no-title scrollable range locale="zh-cn" :min="minDate">
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" @click="queryDataList">
                   确定
@@ -72,6 +72,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 /**
  * 数据过滤与操作组件
  * 支持比赛时间、比赛类型、搜索输入筛选，支持导入导出操作
@@ -87,7 +88,8 @@ export default {
     }
   },
   data: () => ({
-    menu: false
+    menu: false,
+    minDate: moment(Date.now()).format('YYYY-MM-DD')
   }),
   methods: {
     handleClick (eventName, type) {
