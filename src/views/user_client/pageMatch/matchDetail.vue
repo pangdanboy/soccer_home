@@ -70,10 +70,26 @@
               <v-icon left style="color: #ffffff;">
                 mdi-account-group-outline
               </v-icon>
-              <span>比赛参赛人员({{ matchInfo.matchGamerList.length }}/10)：</span>
+              <span>比赛参赛人员(绿色方)({{ matchInfo.matchGamerListGreen.length }}/5)：</span>
               <div class="gamer-list">
-                <template v-for="(item) in matchGamerInfo">
+                <template v-for="(item) in matchGamerInfoGreen">
                   <v-chip class="ma-2" color="green" link :key="item._id">
+                    <v-icon left>
+                      mdi-account-outline
+                    </v-icon>
+                    <p style="margin: 0; font-size: 14px;">{{ item.username }}</p>
+                  </v-chip>
+                </template>
+              </div>
+            </div>
+            <div class="match-gamers">
+              <v-icon left style="color: #ffffff;">
+                mdi-account-group-outline
+              </v-icon>
+              <span>比赛参赛人员(橙色方)({{ matchInfo.matchGamerListOrange.length }}/5)：</span>
+              <div class="gamer-list">
+                <template v-for="(item) in matchGamerInfoOrange">
+                  <v-chip class="ma-2" color="orange" link :key="item._id">
                     <v-icon left>
                       mdi-account-outline
                     </v-icon>
@@ -87,15 +103,21 @@
       </template>
       <template #operate>
         <v-btn
-          color="primary"
-          @click="openDialog('in')"
-          v-show="!matchInfo.matchGamerList.includes($store.state.UserInfo.id)"
-          :disabled="matchInfo.matchGamerList.length >= 10"
-        >参加比赛</v-btn>
+          color="green"
+          @click="openDialog('inGreen')"
+          v-show="!matchInfo.matchGamerListGreen.includes($store.state.UserInfo.id) && !matchInfo.matchGamerListOrange.includes($store.state.UserInfo.id)"
+          :disabled="matchInfo.matchGamerListGreen.length >= 5"
+        >加入绿色方</v-btn>
+        <v-btn
+          color="orange"
+          @click="openDialog('inOrange')"
+          v-show="!matchInfo.matchGamerListGreen.includes($store.state.UserInfo.id) && !matchInfo.matchGamerListOrange.includes($store.state.UserInfo.id)"
+          :disabled="matchInfo.matchGamerListGreen.length >= 5"
+        >加入橙色方</v-btn>
         <v-btn
           color="error"
           @click="openDialog('out')"
-          v-show="matchInfo.matchGamerList.includes($store.state.UserInfo.id)"
+          v-show="matchInfo.matchGamerListGreen.includes($store.state.UserInfo.id) || matchInfo.matchGamerListOrange.includes($store.state.UserInfo.id)"
         >退出比赛</v-btn>
       </template>
     </detail>
@@ -132,8 +154,10 @@ export default {
     matchInfo: {},
     // 场地信息
     areaInfo: {},
-    // 赛事参加人员信息，根据matchInfo中的参赛人员列表查询获得
-    matchGamerInfo: [],
+    // 赛事参加人员信息(绿色方)，根据matchInfo中的参赛人员列表查询获得
+    matchGamerInfoGreen: [],
+    // 赛事参加人员信息(橙色方)，根据matchInfo中的参赛人员列表查询获得
+    matchGamerInfoOrange: [],
     // 二次确认弹框配置
     dialogConfig: {
       // 弹框打开与否
@@ -145,6 +169,10 @@ export default {
       // 弹框确认触发事件
       event: ''
     },
+    // 用户参加比赛队伍类型(inGreen, inOrange)
+    joinMatchGamerType: '',
+    // 当前用户所属参赛者类型(inGreen, inOrange)
+    currentGamerType: '',
     CLASS_TIME_PARAMS_MAP
   }),
   computed: {
@@ -159,9 +187,17 @@ export default {
         if (res.success) {
           this.matchInfo = res.data.match
           this.areaInfo = res.data.area
-          // 查询所有参赛者信息，初始化下拉框数据
-          getUserByIds({ userIds: this.matchInfo.matchGamerList }).then(userInfoList => {
-            this.matchGamerInfo = userInfoList.data
+          if (this.matchInfo.matchGamerListGreen.includes(this.$store.state.UserInfo.id)) this.currentGamerType = 'inGreen'
+          if (this.matchInfo.matchGamerListOrange.includes(this.$store.state.UserInfo.id)) this.currentGamerType = 'inOrange'
+          // 查询所有参赛者信息(绿色方)，初始化下拉框数据
+          getUserByIds({ userIds: this.matchInfo.matchGamerListGreen }).then(userInfoList => {
+            this.matchGamerInfoGreen = userInfoList.data
+          }).catch(err => {
+            console.log(err)
+          })
+          // 查询所有参赛者信息(橙色方)，初始化下拉框数据
+          getUserByIds({ userIds: this.matchInfo.matchGamerListOrange }).then(userInfoList => {
+            this.matchGamerInfoOrange = userInfoList.data
           }).catch(err => {
             console.log(err)
           })
@@ -186,10 +222,16 @@ export default {
         return
       }
       this.dialogConfig.status = true
-      if (type === 'in') {
+      if (type === 'inGreen') {
         this.dialogConfig.title = '参加比赛'
-        this.dialogConfig.content = '你确认参加该场比赛吗？'
+        this.dialogConfig.content = '你确认参加该场比赛的绿色方队伍吗？'
         this.dialogConfig.event = 'join'
+        this.joinMatchGamerType = type
+      } else if (type === 'inOrange') {
+        this.dialogConfig.title = '参加比赛'
+        this.dialogConfig.content = '你确认参加该场比赛的橙色方队伍吗？'
+        this.dialogConfig.event = 'join'
+        this.joinMatchGamerType = type
       } else {
         this.dialogConfig.title = '退出比赛'
         this.dialogConfig.content = '你确认退出该场比赛吗？'
@@ -202,7 +244,7 @@ export default {
     quitMatch () {
       console.log('退出比赛')
       const { matchId } = this.$route.query
-      quitMatch({ matchId: matchId }).then(res => {
+      quitMatch({ matchId: matchId, quitMatchGamerType: this.currentGamerType }).then(res => {
         console.log(res)
         this.OPEN_MESSAGE({
           content: res.message,
@@ -218,7 +260,7 @@ export default {
     joinMatch () {
       console.log('参加比赛')
       const { matchId } = this.$route.query
-      joinMatch({ matchId: matchId }).then(res => {
+      joinMatch({ matchId: matchId, joinMatchGamerType: this.joinMatchGamerType }).then(res => {
         console.log(res)
         this.OPEN_MESSAGE({
           content: res.message,
@@ -256,6 +298,7 @@ export default {
         align-items: center;
         justify-content: space-between;
         padding: 10px;
+        overflow: auto;
         .match-area{
           width: 45%;
           height: 100%;
@@ -273,6 +316,7 @@ export default {
             height: 80%;
             border: 2px solid #1976d2;
             border-radius: 5px;
+            overflow: auto;
             .match-des, .match-gamers{
               max-height: 33%;
               border-radius: 10px;

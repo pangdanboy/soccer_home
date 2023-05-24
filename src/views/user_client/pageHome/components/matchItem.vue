@@ -32,8 +32,8 @@
           比赛时间：{{ matchData.matchDate.split('T')[0] + '-' + CLASS_TIME_PARAMS_MAP[matchData.matchClassTime].name + '-' + CLASS_TIME_PARAMS_MAP[matchData.matchClassTime].time}}
         </p>
         <p class="match-participants">
-          当前参与人数：{{ matchData.matchGamerList.length }}
-          <span>(剩余{{ 10 - matchData.matchGamerList.length }}个位置)</span>
+          当前参与人数：{{ matchData.matchGamerListGreen.length + matchData.matchGamerListOrange.length }}
+          <span>(剩余{{ 10 - (matchData.matchGamerListGreen.length + matchData.matchGamerListOrange.length) }}个位置)</span>
         </p>
         <v-btn class="match-operation primary" @click="checkDetail(matchData._id)">查看详情</v-btn>
       </div>

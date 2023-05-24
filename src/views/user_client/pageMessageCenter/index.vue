@@ -57,6 +57,7 @@ export default {
       { text: '比赛信息变动类型', value: 'messageType' },
       { text: '比赛日期', value: 'matchDate' },
       { text: '变动字段', value: 'changeColumn' },
+      { text: '通知时间', value: 'createTime' },
       { text: '操作', value: 'operate' }
     ],
     // 比赛表格配置信息
@@ -75,9 +76,16 @@ export default {
       queryMessage(query).then(res => {
         console.log(res)
         this.messageList = res.data
+        this.handlerMatchData()
         this.messageTotalCount = res.count
       }).catch(err => {
         console.log(err)
+      })
+    },
+    handlerMatchData () {
+      this.messageList.forEach(item => {
+        item.matchDate = item.matchDate.split('T')[0]
+        item.createTime = item.createTime.split('T')[0]
       })
     },
     checkMatchDetail (match) {

@@ -11,8 +11,8 @@ router.post('/queryMessage', passport.authenticate('jwt', { session: false }), (
     sort: { _id: -1 },
     lean: true
   }
-  const nowDate = moment(Date.now()).format('yyyy-mm-dd')
-  const query = { $gte: new Date(nowDate) }
+  const nowDate = moment(Date.now()).format('YYYY-MM-DD')
+  const query = { matchDate: { $gte: new Date(nowDate) } }
   Message.paginate(query, options).then(messageList => {
     return res.json({
       code: 200,

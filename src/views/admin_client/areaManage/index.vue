@@ -450,6 +450,34 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+  #area_manage{
+    width: 100%;
+    height: 100%;
+    .area-manage{
+      width: 100%;
+      height: 100%;
+      ::v-deep .v-card{
+        width: 100%;
+        height: 100%;
+        .v-card__title{
+          width: 100%;
+          height: 10%;
+        }
+        .v-card__subtitle{
+          width: 100%;
+          height: 5%;
+        }
+        .v-card__text{
+          width: 100%;
+          height: 80%;
+          overflow: auto;
+        }
+        .v-card__actions{
+          width: 100%;
+          height: 5%;
+        }
+      }
+    }
+  }
 </style>

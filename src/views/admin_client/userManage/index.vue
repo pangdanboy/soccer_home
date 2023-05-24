@@ -17,7 +17,8 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
-                  @click="changeUserAuth(item)"
+                  v-show="item._id !== $store.state.UserInfo.id"
+                  @click="openEditUserPermissionsDialog(item)"
                   style="cursor: pointer; margin-right: 10px;"
                   v-bind="attrs" v-on="on"
                 >mdi-shield-edit-outline</v-icon>
@@ -40,6 +41,24 @@
     </detail>
     <!--重置用户密码二次确认弹框 -->
     <common-dialog :dialog-config="resetPasswordDialogConfig" @close="closeResetPasswordDialog" @reset="resetUserPassword"></common-dialog>
+    <!-- 修改用户权限二次选择确认框 -->
+    <v-dialog v-model="editUserPermissionsDialog" width="40%">
+      <v-card>
+        <v-card-title>修改用户权限</v-card-title>
+        <v-card-subtitle>选择将要修改的用户权限角色</v-card-subtitle>
+        <v-card-text>
+          <v-radio-group v-model="userPermissions" row>
+            <v-radio value="0" label="普通用户"></v-radio>
+            <v-radio value="1" label="管理员"></v-radio>
+            <v-radio value="2" label="超级管理员"></v-radio>
+          </v-radio-group>
+        </v-card-text>
+        <v-card-actions style="padding-top: 0; display: flex; align-items: center; justify-content: flex-end">
+          <v-btn @click="() => this.editUserPermissionsDialog = false">取消</v-btn>
+          <v-btn @click="changeUserPermissions" color="primary">确认</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -48,7 +67,8 @@ import detail from '@/components/detail'
 import filterHeader from '@/components/filterHeader.vue'
 import commonDialog from '@/components/commonDialog'
 import { USER_LEVEL_PARAMS_MAP, USER_PERMISSIONS_TEXT, USER_LEVEL } from '@/constant'
-import { queryUser } from '@/http/user'
+import { queryUser, resetPassword, changeUserAuth } from '@/http/user'
+import { mapMutations } from 'vuex'
 
 export default {
   name: 'userManage',
@@ -112,12 +132,19 @@ export default {
       event: 'reset',
       // 待重置密码用户的id
       userId: ''
-    }
+    },
+    // 修改用户权限弹框
+    editUserPermissionsDialog: false,
+    // 将要修改权限的用户id
+    editPermissionsUserId: '',
+    // 当前修改的用户权限，默认为修改之前的用户权限
+    userPermissions: ''
   }),
   mounted () {
     this.getUserList()
   },
   methods: {
+    ...mapMutations(['OPEN_MESSAGE']),
     getUserList () {
       const query = {}
       query.page = this.userListOptions.page
@@ -148,15 +175,73 @@ export default {
     closeResetPasswordDialog () {
       this.resetPasswordDialogConfig.status = false
     },
-    changeUserAuth () {
+    openEditUserPermissionsDialog (user) {
+      this.editUserPermissionsDialog = true
+      // 存储修改用户权限的用户id和用户当前权限
+      this.editPermissionsUserId = user._id
+      this.userPermissions = USER_LEVEL_PARAMS_MAP[user.role]
     },
+    // 修改用户权限
+    changeUserPermissions () {
+      changeUserAuth({
+        userId: this.editPermissionsUserId,
+        role: this.userPermissions
+      }).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) this.editUserPermissionsDialog = false
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    // 重置用户密码
     resetUserPassword () {
-      this.closeResetPasswordDialog()
+      resetPassword().then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) this.closeResetPasswordDialog()
+      }).catch(err => {
+        console.log(err)
+      })
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-
+  #user_manage{
+    width: 100%;
+    height: 100%;
+    .user-manage{
+      width: 100%;
+      height: 100%;
+      ::v-deep .v-card{
+        width: 100%;
+        height: 100%;
+        .v-card__title{
+          width: 100%;
+          height: 10%;
+        }
+        .v-card__subtitle{
+          width: 100%;
+          height: 5%;
+        }
+        .v-card__text{
+          width: 100%;
+          height: 80%;
+          overflow: auto;
+        }
+        .v-card__actions{
+          width: 100%;
+          height: 5%;
+        }
+      }
+    }
+  }
 </style>

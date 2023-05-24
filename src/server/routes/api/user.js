@@ -67,8 +67,9 @@ router.post('/register', (req, res) => {
  */
 router.post('/queryUser', passport.authenticate('jwt', { session: false }), (req, res) => {
   const userRole = req.user.role
+  console.log(userRole)
   // 校验用户角色是否为超级管理员
-  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+  if (!verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
     authThrow(res)
     return
   }
@@ -103,7 +104,7 @@ router.post('/queryUser', passport.authenticate('jwt', { session: false }), (req
 router.post('/resetPassword', passport.authenticate('jwt', { session: false }), (req, res) => {
   const userRole = req.user.role
   // 校验用户角色是否为超级管理员
-  if (verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+  if (!verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
     authThrow(res)
     return
   }
@@ -128,6 +129,31 @@ router.post('/resetPassword', passport.authenticate('jwt', { session: false }), 
         commonThrow(res, saveError)
       })
     })
+  })
+})
+
+/**
+ * 修改用户权限
+ */
+router.post('/changeUserAuth', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const userRole = req.user.role
+  // 校验用户角色是否为超级管理员
+  if (!verifyUserRole(userRole, USER_PERMISSIONS.SUPER_ADMIN)) {
+    authThrow(res)
+    return
+  }
+  const changeUserRole = req.body.role
+  const userId = req.body.userId
+  // 修改用户权限
+  User.updateOne({ _id: userId }, { role: changeUserRole }).then(updateRes => {
+    return res.json({
+      code: 200,
+      data: {},
+      message: '修改成功！',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
   })
 })
 

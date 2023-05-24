@@ -36,8 +36,13 @@ const match = {
     type: String,
     require: true
   },
-  // 比赛参赛人员列表
-  matchGamerList: {
+  // 比赛参赛人员列表(绿色方)
+  matchGamerListGreen: {
+    type: Array,
+    require: true
+  },
+  // 比赛参赛人员列表(橙色方)
+  matchGamerListOrange: {
     type: Array,
     require: true
   },

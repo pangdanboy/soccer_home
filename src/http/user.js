@@ -28,6 +28,26 @@ export const queryUser = (params) => {
   })
 }
 
+export const resetPassword = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/user/resetPassword', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const changeUserAuth = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/user/changeUserAuth', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
 export const getCurrentUserInfo = (params) => {
   return new Promise((resolve, reject) => {
     axios.get('/user/current', { params }).then(res => {

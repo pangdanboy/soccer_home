@@ -24,7 +24,8 @@ router.post('/create', passport.authenticate('jwt', { session: false }), (req, r
     matchAreaId: req.body.matchAreaId,
     matchType: req.body.matchType,
     matchDescription: req.body.matchDescription,
-    matchGamerList: req.body.matchGamerList,
+    matchGamerListGreen: req.body.matchGamerListGreen,
+    matchGamerListOrange: req.body.matchGamerListOrange,
     updateTime: Date.now()
   })
   newMatch.save().then(match => {
@@ -53,7 +54,8 @@ router.post('/editMatch', passport.authenticate('jwt', { session: false }), (req
     matchAreaId: req.body.matchAreaId,
     matchType: req.body.matchType,
     matchDescription: req.body.matchDescription,
-    matchGamerList: req.body.matchGamerList,
+    matchGamerListGreen: req.body.matchGamerListGreen,
+    matchGamerListOrange: req.body.matchGamerListOrange,
     updateTime: Date.now()
   }
   // 发送系统通知告知用户比赛信息发生变化
@@ -131,7 +133,11 @@ router.post('/queryMatch', (req, res) => {
 router.post('/joinMatch', passport.authenticate('jwt', { session: false }), (req, res) => {
   const joinUserId = req.user._id.toString()
   const joinMatchId = req.body.matchId
-  Match.updateOne({ _id: joinMatchId }, { $push: { matchGamerList: joinUserId } }).then(match => {
+  const joinMatchGamerType = req.body.joinMatchGamerType
+  let updateColumn = {}
+  if (joinMatchGamerType === 'inGreen') updateColumn = { $push: { matchGamerListGreen: joinUserId } }
+  if (joinMatchGamerType === 'inOrange') updateColumn = { $push: { matchGamerListOrange: joinUserId } }
+  Match.updateOne({ _id: joinMatchId }, updateColumn).then(match => {
     return res.json({
       code: 200,
       data: {},
@@ -149,7 +155,11 @@ router.post('/joinMatch', passport.authenticate('jwt', { session: false }), (req
 router.post('/quitMatch', passport.authenticate('jwt', { session: false }), (req, res) => {
   const quitUserId = req.user._id.toString()
   const quitMatchId = req.body.matchId
-  Match.updateOne({ _id: quitMatchId }, { $pull: { matchGamerList: quitUserId } }).then(match => {
+  const quitMatchGamerType = req.body.quitMatchGamerType
+  let updateColumn = {}
+  if (quitMatchGamerType === 'inGreen') updateColumn = { $pull: { matchGamerListGreen: quitUserId } }
+  if (quitMatchGamerType === 'inOrange') updateColumn = { $pull: { matchGamerListOrange: quitUserId } }
+  Match.updateOne({ _id: quitMatchId }, updateColumn).then(match => {
     return res.json({
       code: 200,
       data: {},

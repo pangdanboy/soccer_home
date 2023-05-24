@@ -47,7 +47,7 @@ const routes = [
     name: 'pageMatchDetail',
     component: () => import('../views/user_client/pageMatch/matchDetail'),
     meta: {
-      isAuth: true
+      isAuth: false
     }
   },
   {

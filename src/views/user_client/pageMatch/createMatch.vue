@@ -94,6 +94,7 @@
                       :value="MATCH_TYPE_PARAMS[MATCH_TYPE.CLASS_MATCH]"
                       v-bind="attrs"
                       v-on="on"
+                      v-show="USER_ROLE === USER_PERMISSIONS.ADMIN || USER_ROLE === USER_PERMISSIONS.SUPER_ADMIN"
                     ></v-radio>
                   </template>
                   <span>课程比赛由课程老师或者俱乐部组织比赛，需要指定参赛队员</span>
@@ -105,6 +106,7 @@
                       :value="MATCH_TYPE_PARAMS[MATCH_TYPE.LEAGUE_MATCH]"
                       v-bind="attrs"
                       v-on="on"
+                      v-show="USER_ROLE === USER_PERMISSIONS.SUPER_ADMIN"
                     ></v-radio>
                   </template>
                   <span>联盟比赛由官方联盟组织比赛，需要指定参赛队员</span>
@@ -112,20 +114,36 @@
               </v-radio-group>
               <div class="match-gamer" v-show="editMatchData.matchType !== MATCH_TYPE_PARAMS[MATCH_TYPE.FREE_MATCH]">
                 <v-autocomplete
-                  v-model="editMatchData.matchGamerList"
-                  :items="searchGamerList"
+                  v-model="editMatchData.matchGamerListGreen"
+                  :items="searchGamerListGreen"
                   item-text="username"
                   item-value="_id"
-                  @update:search-input="searchGamers"
+                  @update:search-input="searchGamersGreen"
                   deletable-chips
                   outlined
                   dense
                   chips
                   small-chips
-                  label="指定参赛队员"
+                  label="指定参赛队员(绿色方)"
                   multiple
                   cache-items
-                  counter="10"
+                  counter="5"
+                ></v-autocomplete>
+                <v-autocomplete
+                  v-model="editMatchData.matchGamerListOrange"
+                  :items="searchGamerListOrange"
+                  item-text="username"
+                  item-value="_id"
+                  @update:search-input="searchGamersOrange"
+                  deletable-chips
+                  outlined
+                  dense
+                  chips
+                  small-chips
+                  label="指定参赛队员(橙色方)"
+                  multiple
+                  cache-items
+                  counter="5"
                 ></v-autocomplete>
               </div>
             </div>
@@ -163,8 +181,8 @@
 </template>
 
 <script>
-import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME, CLASS_TIME_PARAMS_MAP } from '@/constant'
-import { mapMutations } from 'vuex'
+import { MATCH_TYPE, MATCH_TYPE_PARAMS, CLASS_TIME, CLASS_TIME_PARAMS_MAP, USER_PERMISSIONS } from '@/constant'
+import { mapGetters, mapMutations } from 'vuex'
 import { createMatch, editMatch, getMatchById, getFreeArea } from '@/http/match'
 import { getUserByIds, getUserByInput } from '@/http/user'
 import detail from '@/components/detail'
@@ -199,19 +217,21 @@ export default {
       matchDescription: '',
       // 比赛类型
       matchType: MATCH_TYPE_PARAMS[MATCH_TYPE.FREE_MATCH],
-      // 参赛者列表
-      matchGamerList: []
+      // 参赛者列表(绿色方)
+      matchGamerListGreen: [],
+      // 参赛者列表(橙色方)
+      matchGamerListOrange: []
     },
     // 比赛日期选择器
     matchDatePicker: false,
-    // 根据用户输入搜索的参赛人员列表
-    searchGamerList: [],
+    // 根据用户输入搜索的参赛人员列表(绿色方)
+    searchGamerListGreen: [],
+    // 根据用户输入搜索的参赛人员列表(橙色方)
+    searchGamerListOrange: [],
     // 比赛场地待选项，查询获取
     areaList: [],
     // 当前编辑比赛的场地信息
     currentMatchArea: {},
-    // 比赛日期和时间变化次数
-    dateAndTimeChangeCount: 0,
     // 比赛课程时间待选项
     matchTimeSelectList: ['第一讲', '第二讲', '第三讲', '第四讲', '第五讲', '第六讲'],
     formRules: {
@@ -232,10 +252,12 @@ export default {
         v => !!v || '比赛描述不能为空！'
       ]
     },
-    timeId: null,
+    timeIdGreen: null,
+    timeIdOrange: null,
     minDate: moment(Date.now()).format('YYYY-MM-DD'),
     MATCH_TYPE,
-    MATCH_TYPE_PARAMS
+    MATCH_TYPE_PARAMS,
+    USER_PERMISSIONS
   }),
   mounted () {
     console.log(this.$route)
@@ -244,6 +266,9 @@ export default {
       this.detailConfig.title = '编辑比赛'
       this.getMatchData()
     }
+  },
+  computed: {
+    ...mapGetters(['USER_ROLE'])
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
@@ -281,9 +306,9 @@ export default {
           })
           return
         }
-        if (this.editMatchData.matchGamerList.length > 10) {
+        if (this.editMatchData.matchGamerListGreen.length > 5 || this.editMatchData.matchGamerListOrange.length > 5) {
           this.OPEN_MESSAGE({
-            content: '参赛人员不能超过10个！',
+            content: '每一队的参赛人员不能超过5个！',
             type: 'error',
             timeout: 3000
           })
@@ -323,15 +348,29 @@ export default {
         })
       }
     },
-    // 搜索用户
-    searchGamers (value) {
+    // 搜索用户(绿色方)
+    searchGamersGreen (value) {
       if (!value) return
       console.log('用户输入搜索', value)
-      this.timerId && clearTimeout(this.timerId)
-      this.timerId = setTimeout(() => {
+      this.timeIdGreen && clearTimeout(this.timeIdGreen)
+      this.timeIdGreen = setTimeout(() => {
         getUserByInput({ userInput: value }).then(res => {
           console.log(res)
-          if (res.success) this.searchGamerList = res.data
+          if (res.success) this.searchGamerListGreen = res.data
+        }).catch(err => {
+          console.log(err)
+        })
+      }, 1000)
+    },
+    // 搜索用户(橙色方)
+    searchGamersOrange (value) {
+      if (!value) return
+      console.log('用户输入搜索', value)
+      this.timeIdOrange && clearTimeout(this.timeIdOrange)
+      this.timeIdOrange = setTimeout(() => {
+        getUserByInput({ userInput: value }).then(res => {
+          console.log(res)
+          if (res.success) this.searchGamerListOrange = res.data
         }).catch(err => {
           console.log(err)
         })
@@ -352,15 +391,11 @@ export default {
           this.editMatchData.matchClassTime = CLASS_TIME_PARAMS_MAP[res.data.match.matchClassTime].name
           this.editMatchData.matchAreaId = res.data.match.matchAreaId
           this.editMatchData.matchType = res.data.match.matchType
-          this.editMatchData.matchGamerList = res.data.match.matchGamerList
+          this.editMatchData.matchGamerListGreen = res.data.match.matchGamerListGreen
+          this.editMatchData.matchGamerListOrange = res.data.match.matchGamerListOrange
           this.editMatchData.matchDescription = res.data.match.matchDescription
-          if (res.data.match.matchGamerList.length === 0) return
-          // 查询所有参赛者信息，初始化下拉框数据
-          getUserByIds({ userIds: this.editMatchData.matchGamerList }).then(userInfoList => {
-            this.searchGamerList = userInfoList.data
-          }).catch(err => {
-            console.log(err)
-          })
+          if (res.data.match.matchGamerListGreen.length !== 0) this.getUserByIdsGreen(this.editMatchData.matchGamerListGreen)
+          if (res.data.match.matchGamerListOrange.length !== 0) this.getUserByIdsOrange(this.editMatchData.matchGamerListOrange)
         } else {
           this.OPEN_MESSAGE({
             content: res.message,
@@ -368,6 +403,22 @@ export default {
             timeout: 3000
           })
         }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getUserByIdsGreen (matchGamerList) {
+      // 查询所有参赛者信息，初始化下拉框数据
+      getUserByIds({ userIds: matchGamerList }).then(userInfoList => {
+        this.searchGamerListGreen = userInfoList.data
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getUserByIdsOrange (matchGamerList) {
+      // 查询所有参赛者信息，初始化下拉框数据
+      getUserByIds({ userIds: matchGamerList }).then(userInfoList => {
+        this.searchGamerListOrange = userInfoList.data
       }).catch(err => {
         console.log(err)
       })
@@ -420,6 +471,27 @@ export default {
         }
         .match-description, .match-type{
           width: 100%;
+        }
+      }
+      ::v-deep .v-card{
+        width: 100%;
+        height: 100%;
+        .v-card__title{
+          width: 100%;
+          height: 11%;
+        }
+        .v-card__subtitle{
+          width: 100%;
+          height: 4%;
+        }
+        .v-card__text{
+          width: 100%;
+          height: 80%;
+          overflow: auto;
+        }
+        .v-card__actions{
+          width: 100%;
+          height: 5%;
         }
       }
     }
