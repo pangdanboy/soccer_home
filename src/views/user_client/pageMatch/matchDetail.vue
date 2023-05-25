@@ -100,6 +100,78 @@
             </div>
           </div>
         </div>
+        <div class="match-score">
+          <!-- 绿色方 -->
+          <v-card style="background-color: rgba(255, 255, 255, 0.7); width: 45%; height: 80%;">
+            <v-card-title style="color: rgb(76, 175, 80); height: 18%">绿色方</v-card-title>
+            <v-card-subtitle>绿色方队伍进球数</v-card-subtitle>
+            <v-card-text style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 56%;">
+              <!-- 进球数 -->
+              <div class="score-text" style="font-size: 36px; margin-bottom: 10px;">
+                <span style="font-size: 24px;">进球数：1</span>
+              </div>
+              <!-- 进球数图标 -->
+              <div class="score-icon" style="margin-bottom: 10px;">
+                <v-icon size="45">mdi-soccer</v-icon>
+                <!-- 最多显示八个进球，之后显示省略号 -->
+                <span style="font-size: 36px;">...</span>
+              </div>
+              <!-- 支持率 -->
+              <div class="support" style="font-size: 32px;">
+                <p>支持率：</p>
+                <v-progress-linear
+                  v-model="knowledge"
+                  height="25"
+                  color="green"
+                >
+                  <strong>{{ Math.ceil(knowledge) }}%</strong>
+                </v-progress-linear>
+              </div>
+            </v-card-text>
+            <v-card-actions style="display: flex; align-items: center; justify-content: flex-start;">
+              <v-btn color="green">支持</v-btn>
+              <v-btn color="green" v-show="matchInfo.createMatchUserId === $store.state.UserInfo.id">+1</v-btn>
+            </v-card-actions>
+          </v-card>
+          <!-- 比赛图标 -->
+          <v-icon size="55" color="white">mdi-fencing</v-icon>
+          <!-- 橙色方 -->
+          <v-card style="background-color: rgba(255, 255, 255, 0.7); width: 45%; height: 80%;">
+            <v-card-title style="color: rgb(255, 152, 0); height: 18%">橙色方</v-card-title>
+            <v-card-subtitle>橙色方队伍进球数</v-card-subtitle>
+            <v-card-text style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 56%;">
+              <div class="score-text" style="font-size: 36px; margin-bottom: 10px;">
+                <span style="font-size: 24px;">进球数：1</span>
+              </div>
+              <div class="score-icon" style="margin-bottom: 10px;">
+                <v-icon size="45">mdi-soccer</v-icon>
+                <v-icon size="45">mdi-soccer</v-icon>
+                <v-icon size="45">mdi-soccer</v-icon>
+                <v-icon size="45">mdi-soccer</v-icon>
+                <v-icon size="45">mdi-soccer</v-icon>
+                <v-icon size="45">mdi-soccer</v-icon>
+                <v-icon size="45">mdi-soccer</v-icon>
+                <v-icon size="45">mdi-soccer</v-icon>
+                <!-- 最多显示八个进球，之后显示省略号 -->
+                <span style="font-size: 36px;">...</span>
+              </div>
+              <div class="support" style="font-size: 32px;">
+                <p>支持率：</p>
+                <v-progress-linear
+                  v-model="knowledge"
+                  height="25"
+                  color="orange"
+                >
+                  <strong>{{ Math.ceil(knowledge) }}%</strong>
+                </v-progress-linear>
+              </div>
+            </v-card-text>
+            <v-card-actions style="display: flex; align-items: center; justify-content: flex-end;">
+              <v-btn color="orange" v-show="matchInfo.createMatchUserId === $store.state.UserInfo.id">+1</v-btn>
+              <v-btn color="orange">支持</v-btn>
+            </v-card-actions>
+          </v-card>
+        </div>
       </template>
       <template #operate>
         <v-btn
@@ -173,6 +245,7 @@ export default {
     joinMatchGamerType: '',
     // 当前用户所属参赛者类型(inGreen, inOrange)
     currentGamerType: '',
+    knowledge: 33,
     CLASS_TIME_PARAMS_MAP
   }),
   computed: {
@@ -295,10 +368,21 @@ export default {
         width: 100%;
         height: 75%;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         padding: 10px;
         overflow: auto;
+        &::-webkit-scrollbar {
+          width: 10px;
+        }
+        &::-webkit-scrollbar-track {
+          background-color: rgba(25, 118, 210);
+        }
+        &::-webkit-scrollbar-thumb {
+          background-color: rgba(255, 255, 255);
+          border-radius: 10px;
+        }
         .match-area{
           width: 45%;
           height: 100%;
@@ -317,14 +401,40 @@ export default {
             border: 2px solid #1976d2;
             border-radius: 5px;
             overflow: auto;
-            .match-des, .match-gamers{
-              max-height: 33%;
+            &::-webkit-scrollbar {
+              width: 10px;
+            }
+            &::-webkit-scrollbar-track {
+              background-color: rgba(25, 118, 210);
+            }
+            &::-webkit-scrollbar-thumb {
+              background-color: rgba(255, 255, 255);
               border-radius: 10px;
-              overflow: auto;
+            }
+            .match-des, .match-gamers{
+              border-radius: 10px;
               background-color: #1976d2;
               margin: 8px;
               padding: 2px 6px;
               color: #ffffff;
+            }
+          }
+        }
+        .match-score{
+          width: 100%;
+          height: 100%;
+          background-image: url('./../../../static/images/home.jpg');
+          background-size: cover;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0px 20px;
+          .support{
+            width: 90%;
+            display: flex;
+            p{
+              font-size: 22px;
+              width: 120px;
             }
           }
         }

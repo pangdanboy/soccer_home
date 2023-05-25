@@ -12,10 +12,10 @@ router.get('/systemInfo', passport.authenticate('jwt', { session: false }), (req
   const findArr = []
   // 查询今日比赛数量和参赛人数
   const nowDateMatchCount = Match.find({ matchDate: queryDate }).count()
-  const nowDateMatchGamerList = Match.find({ matchDate: queryDate }, { matchGamerList: 1 })
+  const nowDateMatchGamerList = Match.find({ matchDate: queryDate }, { matchGamerListGreen: 1, matchGamerListOrange: 1 })
   // 查询比赛总数量和总参赛人数
   const TotalMatchCount = Match.find().count()
-  const TotalMatchGamerList = Match.find({}, { matchGamerList: 1 })
+  const TotalMatchGamerList = Match.find({}, { matchGamerListGreen: 1, matchGamerListOrange: 1 })
   findArr.push(nowDateMatchCount)
   findArr.push(nowDateMatchGamerList)
   findArr.push(TotalMatchCount)
@@ -32,14 +32,16 @@ router.get('/systemInfo', passport.authenticate('jwt', { session: false }), (req
     let matchCount = 0
     let totalMatchCount = 0
     info[1].forEach(item => {
-      matchCount += item.matchGamerList.length
+      matchCount += item.matchGamerListGreen.length
+      matchCount += item.matchGamerListOrange.length
     })
     // 当天比赛人数
     systemInfo.nowDateMatchGamerCount = matchCount
     // 历史比赛数量
     systemInfo.totalMatchCount = info[2]
     info[3].forEach(item => {
-      totalMatchCount += item.matchGamerList.length
+      totalMatchCount += item.matchGamerListGreen.length
+      totalMatchCount += item.matchGamerListOrange.length
     })
     // 历史比赛人数
     systemInfo.totalMatchGamerCount = totalMatchCount

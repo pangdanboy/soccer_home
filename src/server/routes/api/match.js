@@ -26,6 +26,10 @@ router.post('/create', passport.authenticate('jwt', { session: false }), (req, r
     matchDescription: req.body.matchDescription,
     matchGamerListGreen: req.body.matchGamerListGreen,
     matchGamerListOrange: req.body.matchGamerListOrange,
+    GreenScore: 0,
+    GreenSupport: 0,
+    OrangeScore: 0,
+    OrangeSupport: 0,
     updateTime: Date.now()
   })
   newMatch.save().then(match => {
@@ -182,9 +186,8 @@ router.post('/userJoinMatch', passport.authenticate('jwt', { session: false }), 
     sort: { _id: -1 },
     lean: true
   }
-  const query = {
-    matchGamerList: { $elemMatch: { $eq: joinUserId } }
-  }
+  console.log('用户id', joinUserId)
+  const query = { $or: [{ matchGamerListGreen: { $elemMatch: { $eq: joinUserId } } }, { matchGamerListOrange: { $elemMatch: { $eq: joinUserId } } }] }
   Match.paginate(query, options).then(matchList => {
     return res.json({
       code: 200,
@@ -354,6 +357,18 @@ router.post('/getMatchByDateAndTime', (req, res) => {
   }).catch(err => {
     commonThrow(res, err)
   })
+})
+
+/**
+ * 更新比赛比分
+ */
+router.post('/setScore', passport.authenticate('jwt', { session: false }), (req, res) => {
+})
+
+/**
+ * 更新比赛队伍支持数
+ */
+router.post('/setSupport', passport.authenticate('jwt', { session: false }), (req, res) => {
 })
 
 /**

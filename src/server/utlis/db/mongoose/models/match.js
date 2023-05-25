@@ -46,6 +46,26 @@ const match = {
     type: Array,
     require: true
   },
+  // 绿色方进球数
+  GreenScore: {
+    type: Number,
+    require: true
+  },
+  // 绿色方支持数
+  GreenSupport: {
+    type: Number,
+    require: true
+  },
+  // 橙色方进球数
+  OrangeScore: {
+    type: Number,
+    require: true
+  },
+  // 橙色方支持数
+  OrangeSupport: {
+    type: Number,
+    require: true
+  },
   // 创建时间
   createTime: {
     type: Date,
