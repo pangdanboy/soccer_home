@@ -119,3 +119,23 @@ export const getFreeArea = (params) => {
     })
   })
 }
+
+export const setScore = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/match/setScore', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}
+
+export const setSupport = (params) => {
+  return new Promise((resolve, reject) => {
+    axios.post('/match/setSupport', params).then(res => {
+      resolve(res.data)
+    }).catch(err => {
+      reject(err)
+    })
+  })
+}

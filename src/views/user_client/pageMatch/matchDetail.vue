@@ -108,29 +108,31 @@
             <v-card-text style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 56%;">
               <!-- 进球数 -->
               <div class="score-text" style="font-size: 36px; margin-bottom: 10px;">
-                <span style="font-size: 24px;">进球数：1</span>
+                <span style="font-size: 24px;">进球数：{{ matchInfo.GreenScore }}</span>
               </div>
               <!-- 进球数图标 -->
               <div class="score-icon" style="margin-bottom: 10px;">
-                <v-icon size="45">mdi-soccer</v-icon>
+                <template v-for="item in matchScore(matchInfo.GreenScore)">
+                  <v-icon size="45" :key="item">mdi-soccer</v-icon>
+                </template>
                 <!-- 最多显示八个进球，之后显示省略号 -->
-                <span style="font-size: 36px;">...</span>
+                <span style="font-size: 36px;" v-show="matchInfo.GreenScore > 8">...</span>
               </div>
               <!-- 支持率 -->
               <div class="support" style="font-size: 32px;">
                 <p>支持率：</p>
                 <v-progress-linear
-                  v-model="knowledge"
+                  v-model="GreenSupport"
                   height="25"
                   color="green"
                 >
-                  <strong>{{ Math.ceil(knowledge) }}%</strong>
+                  <strong>{{ GreenSupport || 0 }}%</strong>
                 </v-progress-linear>
               </div>
             </v-card-text>
             <v-card-actions style="display: flex; align-items: center; justify-content: flex-start;">
-              <v-btn color="green">支持</v-btn>
-              <v-btn color="green" v-show="matchInfo.createMatchUserId === $store.state.UserInfo.id">+1</v-btn>
+              <v-btn color="green" @click="openSupportDialog('Green')">支持</v-btn>
+              <v-btn color="green" @click="openScoreDialog('Green')" v-show="matchInfo.createMatchUserId === $store.state.UserInfo.id">+1</v-btn>
             </v-card-actions>
           </v-card>
           <!-- 比赛图标 -->
@@ -141,34 +143,29 @@
             <v-card-subtitle>橙色方队伍进球数</v-card-subtitle>
             <v-card-text style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 56%;">
               <div class="score-text" style="font-size: 36px; margin-bottom: 10px;">
-                <span style="font-size: 24px;">进球数：1</span>
+                <span style="font-size: 24px;">进球数：{{ matchInfo.OrangeScore }}</span>
               </div>
               <div class="score-icon" style="margin-bottom: 10px;">
-                <v-icon size="45">mdi-soccer</v-icon>
-                <v-icon size="45">mdi-soccer</v-icon>
-                <v-icon size="45">mdi-soccer</v-icon>
-                <v-icon size="45">mdi-soccer</v-icon>
-                <v-icon size="45">mdi-soccer</v-icon>
-                <v-icon size="45">mdi-soccer</v-icon>
-                <v-icon size="45">mdi-soccer</v-icon>
-                <v-icon size="45">mdi-soccer</v-icon>
+                <template v-for="item in matchScore(matchInfo.OrangeScore)">
+                  <v-icon size="45" :key="item">mdi-soccer</v-icon>
+                </template>
                 <!-- 最多显示八个进球，之后显示省略号 -->
-                <span style="font-size: 36px;">...</span>
+                <span style="font-size: 36px;" v-show="matchInfo.OrangeScore > 8">...</span>
               </div>
               <div class="support" style="font-size: 32px;">
                 <p>支持率：</p>
                 <v-progress-linear
-                  v-model="knowledge"
+                  v-model="OrangeSupport"
                   height="25"
                   color="orange"
                 >
-                  <strong>{{ Math.ceil(knowledge) }}%</strong>
+                  <strong>{{ OrangeSupport || 0 }}%</strong>
                 </v-progress-linear>
               </div>
             </v-card-text>
             <v-card-actions style="display: flex; align-items: center; justify-content: flex-end;">
-              <v-btn color="orange" v-show="matchInfo.createMatchUserId === $store.state.UserInfo.id">+1</v-btn>
-              <v-btn color="orange">支持</v-btn>
+              <v-btn color="orange" @click="openScoreDialog('Orange')" v-show="matchInfo.createMatchUserId === $store.state.UserInfo.id">+1</v-btn>
+              <v-btn color="orange" @click="openSupportDialog('Orange')">支持</v-btn>
             </v-card-actions>
           </v-card>
         </div>
@@ -194,13 +191,13 @@
       </template>
     </detail>
     <!-- 二次确认 -->
-    <common-dialog :dialog-config="dialogConfig" @join="joinMatch" @quit="quitMatch" @close="closeDialog"></common-dialog>
+    <common-dialog :dialog-config="dialogConfig" @join="joinMatch" @quit="quitMatch" @close="closeDialog" @setScore="setScore" @setSupport="setSupport"></common-dialog>
   </div>
 </template>
 
 <script>
 import detail from '@/components/detail'
-import { getMatchById, joinMatch, quitMatch } from '@/http/match'
+import { getMatchById, joinMatch, quitMatch, setScore, setSupport } from '@/http/match'
 import { CLASS_TIME_PARAMS_MAP } from '@/constant'
 import commonDialog from '@/components/commonDialog'
 import { mapMutations } from 'vuex'
@@ -238,6 +235,8 @@ export default {
       title: '',
       // 弹框内容
       content: '',
+      // 当前点击队伍类型
+      type: '',
       // 弹框确认触发事件
       event: ''
     },
@@ -249,6 +248,12 @@ export default {
     CLASS_TIME_PARAMS_MAP
   }),
   computed: {
+    GreenSupport: function () {
+      return Math.ceil((this.matchInfo.GreenSupport * 100) / (this.matchInfo.GreenSupport + this.matchInfo.OrangeSupport))
+    },
+    OrangeSupport: function () {
+      return Math.floor((this.matchInfo.OrangeSupport * 100) / (this.matchInfo.GreenSupport + this.matchInfo.OrangeSupport))
+    }
   },
   methods: {
     ...mapMutations(['OPEN_MESSAGE']),
@@ -345,6 +350,66 @@ export default {
         console.log(err)
       })
       this.closeDialog()
+    },
+    matchScore (score) {
+      if (score > 8) score = 8
+      const scoreArr = []
+      for (let i = 0; i < score; i++) {
+        scoreArr.push(i)
+      }
+      return scoreArr
+    },
+    openScoreDialog (type) {
+      const teamType = type === 'Green' ? '绿色方队伍' : '橙色方队伍'
+      this.dialogConfig.status = true
+      this.dialogConfig.title = '修改比分'
+      this.dialogConfig.content = '你是这场比赛的创建者，所以你有权限修改该场比赛比分，你确定将' + teamType + '的进球数加一吗？'
+      this.dialogConfig.type = type
+      this.dialogConfig.event = 'setScore'
+    },
+    openSupportDialog (type) {
+      const teamType = type === 'Green' ? '绿色方队伍' : '橙色方队伍'
+      this.dialogConfig.status = true
+      this.dialogConfig.title = '支持队伍'
+      this.dialogConfig.content = '你确定支持' + teamType + '吗？'
+      this.dialogConfig.type = type
+      this.dialogConfig.event = 'setSupport'
+    },
+    setScore () {
+      setScore({
+        matchGamerType: this.dialogConfig.type,
+        matchId: this.matchInfo._id
+      }).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) {
+          this.getMatchData()
+          this.dialogConfig.status = false
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    setSupport () {
+      setSupport({
+        matchGamerType: this.dialogConfig.type,
+        matchId: this.matchInfo._id
+      }).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) {
+          this.getMatchData()
+          this.dialogConfig.status = false
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     }
   }
 }

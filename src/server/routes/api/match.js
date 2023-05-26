@@ -363,12 +363,44 @@ router.post('/getMatchByDateAndTime', (req, res) => {
  * 更新比赛比分
  */
 router.post('/setScore', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const matchGamerType = req.body.matchGamerType
+  const matchId = req.body.matchId
+  const query = { _id: matchId }
+  let update = {}
+  if (matchGamerType === 'Green') update = { $inc: { GreenScore: +1 } }
+  if (matchGamerType === 'Orange') update = { $inc: { OrangeScore: +1 } }
+  Match.updateOne(query, update).then(updateRes => {
+    return res.json({
+      code: 200,
+      data: {},
+      message: '计分成功',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
 })
 
 /**
  * 更新比赛队伍支持数
  */
 router.post('/setSupport', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const matchGamerType = req.body.matchGamerType
+  const matchId = req.body.matchId
+  const query = { _id: matchId }
+  let update = {}
+  if (matchGamerType === 'Green') update = { $inc: { GreenSupport: +1 } }
+  if (matchGamerType === 'Orange') update = { $inc: { OrangeSupport: +1 } }
+  Match.updateOne(query, update).then(updateRes => {
+    return res.json({
+      code: 200,
+      data: {},
+      message: '支持成功',
+      success: true
+    })
+  }).catch(err => {
+    commonThrow(res, err)
+  })
 })
 
 /**
