@@ -298,7 +298,7 @@ export default {
       // 表单校验
       if (!this.$refs.matchForm.validate()) return
       if (this.editMatchData.matchType === MATCH_TYPE_PARAMS[MATCH_TYPE.LEAGUE_MATCH]) {
-        if (this.editMatchData.matchGamerList.length === 0) {
+        if (this.editMatchData.matchGamerListGreen.length === 0 || this.editMatchData.matchGamerListOrange.length === 0) {
           this.OPEN_MESSAGE({
             content: '请指定参赛人员！',
             type: 'error',

@@ -157,28 +157,11 @@ function sendSystemNoticeToUser (changeType, updateColumn, updateMatchId) {
         message.matchId = ''
         message.changeColumn = ''
       }
+      if (match.matchGamerListGreen.length === 0 && match.matchGamerListOrange.length === 0) {
+        resolve(true)
+      }
       // 为比赛的参与用户发送消息通知
-      match.matchGamerListGreen.forEach(userId => {
-        message.userId = userId
-        const newMessage = new Message(message)
-        newMessage.save().then(res => {
-          // 如果操作为删除
-          if (changeType === 'delete') {
-            // 需要将关于该比赛的消息通知都删除
-            Message.deleteMany({ matchId: match._id }).then(delres => {
-              resolve(true)
-            }).catch(err => {
-              reject(err)
-            })
-          }
-          resolve(true)
-        }).catch(err => {
-          console.log(err)
-          reject(err)
-        })
-      })
-      // 为比赛的参与用户发送消息通知
-      match.matchGamerListOrange.forEach(userId => {
+      [...match.matchGamerListGreen, ...match.matchGamerListOrange].forEach(userId => {
         message.userId = userId
         const newMessage = new Message(message)
         newMessage.save().then(res => {

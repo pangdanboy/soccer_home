@@ -28,6 +28,7 @@ router.post('/addArea', passport.authenticate('jwt', { session: false }), (req, 
       message: '添加成功！'
     })
   }).catch(err => {
+    console.log(err)
     commonThrow(res, err)
   })
 })

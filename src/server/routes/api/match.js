@@ -11,10 +11,6 @@ const { USER_PERMISSIONS } = require('./../../global/config')
  * 比赛创建
  */
 router.post('/create', passport.authenticate('jwt', { session: false }), (req, res) => {
-  // 校验用户角色
-  // if (verifyUserRole(req.user.role, USER_PERMISSIONS.COMMON_USER)) {
-  //   authThrow(res)
-  // }
   // 创建比赛
   const newMatch = new Match({
     createMatchUserId: req.user._id,

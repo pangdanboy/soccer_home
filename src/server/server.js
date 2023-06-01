@@ -34,6 +34,7 @@ const upload = require('./routes/api/upload')
 const area = require('./routes/api/area')
 const message = require('./routes/api/message')
 const route = require('./routes/api/routeVerify')
+const comment = require('./routes/api/comment')
 // 使用路由
 app.use('/api/user', user)
 app.use('/api/match', match)
@@ -42,6 +43,7 @@ app.use('/api/upload', upload)
 app.use('/api/area', area)
 app.use('/api/message', message)
 app.use('/api/route', route)
+app.use('/api/comment', comment)
 
 // 开启请求监听
 app.listen(serverInfo.port, () => {

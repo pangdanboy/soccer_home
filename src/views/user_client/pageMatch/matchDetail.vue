@@ -169,6 +169,49 @@
             </v-card-actions>
           </v-card>
         </div>
+        <div class="match-comment">
+          <div class="match-comment-edit">
+            <v-textarea
+              v-model="comment"
+              outlined dense
+              label="发表评论"
+              no-resize
+              clearable
+              counter="200"
+              rows="3"
+            ></v-textarea>
+            <v-btn color="primary" @click="publishComment">发表评论</v-btn>
+          </div>
+          <div class="match-comment-content">
+            <v-timeline align-top>
+              <template v-for="item in matchCommentInfo">
+                <v-timeline-item fill-dot :icon="'mdi-soccer'" :key="item._id">
+                  <v-card>
+                    <v-card-title>
+                      <v-avatar>
+                        <img :src="item.user[0].avatar">
+                      </v-avatar>
+                      {{ item.user[0].username }}
+                    </v-card-title>
+                    <v-card-subtitle>
+                      {{ item.createTime }}
+                    </v-card-subtitle>
+                    <v-card-text>
+                      {{ item.content }}
+                    </v-card-text>
+                  </v-card>
+                </v-timeline-item>
+              </template>
+            </v-timeline>
+          </div>
+          <div class="match-comment-page">
+            <v-pagination
+              v-model="commentPage"
+              class="my-4"
+              :length="matchCommentPage"
+            ></v-pagination>
+          </div>
+        </div>
       </template>
       <template #operate>
         <v-btn
@@ -202,6 +245,8 @@ import { CLASS_TIME_PARAMS_MAP } from '@/constant'
 import commonDialog from '@/components/commonDialog'
 import { mapMutations } from 'vuex'
 import { getUserByIds } from '@/http/user'
+import { addComment, query } from '@/http/comment'
+import moment from 'moment'
 
 export default {
   name: 'matchDetail',
@@ -211,6 +256,7 @@ export default {
   },
   mounted () {
     this.getMatchData()
+    this.getMatchComment()
   },
   data: () => ({
     detailConfig: {
@@ -221,6 +267,10 @@ export default {
     },
     // 赛事信息
     matchInfo: {},
+    // 赛事评论信息
+    matchCommentInfo: [],
+    // 赛事评论分页数量
+    matchCommentPage: 1,
     // 场地信息
     areaInfo: {},
     // 赛事参加人员信息(绿色方)，根据matchInfo中的参赛人员列表查询获得
@@ -244,7 +294,9 @@ export default {
     joinMatchGamerType: '',
     // 当前用户所属参赛者类型(inGreen, inOrange)
     currentGamerType: '',
-    knowledge: 33,
+    // 比赛评论相关
+    comment: '',
+    commentPage: 1,
     CLASS_TIME_PARAMS_MAP
   }),
   computed: {
@@ -410,6 +462,69 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    getMatchComment () {
+      const { matchId } = this.$route.query
+      query({
+        matchId: matchId,
+        page: this.commentPage,
+        limit: 10
+      }).then(res => {
+        console.log(res)
+        if (res.success) {
+          this.matchCommentInfo = res.data
+          this.matchCommentPage = Math.ceil(res.count / 10)
+          this.handleMatchCommentInfo()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    handleMatchCommentInfo () {
+      this.matchCommentInfo.forEach(item => {
+        item.createTime = moment(parseInt(item.createTime)).format('YYYY-MM-DD HH:mm:ss')
+      })
+    },
+    publishComment () {
+      // 检测评论格式
+      if (!this.comment) {
+        this.OPEN_MESSAGE({
+          content: '请填写评论！',
+          type: 'warning',
+          timeout: 3000
+        })
+        return
+      }
+      if (this.comment.length > 100) {
+        this.OPEN_MESSAGE({
+          content: '评论内容字数不能超过200',
+          type: 'warning',
+          timeout: 3000
+        })
+      }
+      addComment({
+        userId: this.$store.state.UserInfo.id,
+        matchId: this.matchInfo._id,
+        content: this.comment
+      }).then(res => {
+        this.OPEN_MESSAGE({
+          content: res.message,
+          type: res.success ? 'success' : 'error',
+          timeout: 3000
+        })
+        if (res.success) {
+          this.comment = ''
+          this.getMatchComment()
+        }
+        console.log(res)
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+  },
+  watch: {
+    commentPage: function () {
+      this.getMatchComment()
     }
   }
 }
@@ -494,6 +609,7 @@ export default {
           align-items: center;
           justify-content: space-between;
           padding: 0px 20px;
+          margin-bottom: 85px;
           .support{
             width: 90%;
             display: flex;
@@ -501,6 +617,36 @@ export default {
               font-size: 22px;
               width: 120px;
             }
+          }
+        }
+        .match-comment{
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          .match-comment-edit{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            .v-input{
+              width: 100%;
+            }
+            .v-btn{
+              align-self: flex-end;
+            }
+          }
+          .match-comment-edit, .match-comment-content{
+            width: 100%;
+          }
+          .match-comment-content{
+            border-top: 2px solid #cccccc;
+            padding: 10px;
+          }
+          .match-comment-page{
+            width: 50%;
           }
         }
       }

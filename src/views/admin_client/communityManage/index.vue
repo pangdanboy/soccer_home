@@ -1,13 +1,14 @@
 <template>
-  <div id="community_manage"></div>
+  <div id="welcome">
+    <h2>欢迎进入</h2>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'communityManage'
+  name: 'welCome'
 }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
 </style>

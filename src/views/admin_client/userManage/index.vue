@@ -210,6 +210,14 @@ export default {
         console.log(err)
       })
     }
+  },
+  watch: {
+    userListOptions: {
+      handler () {
+        this.getUserList()
+      },
+      deep: true
+    }
   }
 }
 </script>
